@@ -14,11 +14,11 @@ Invoke-WebRequest -Uri "https://download.sysinternals.com/files/Sysmon.zip" -Out
 
 Expand-Archive -Path "$env:TEMP\Sysmon.zip" -DestinationPath "$env:TEMP\Sysmon" -Force
 
-#Invoke-WebRequest -Uri "https://raw.githubusercontent.com/SwiftOnSecurity/sysmon-config/master/sysmonconfig-export.xml" -OutFile "$env:TEMP\sysmonconfig.xml"
+Invoke-WebRequest -Uri "https://raw.githubusercontent.com/SwiftOnSecurity/sysmon-config/master/sysmonconfig-export.xml" -OutFile "$env:TEMP\Sysmon\sysmonconfig.xml"
 
-& "$env:TEMP\Sysmon\Sysmon64.exe" -accepteula -i
+#& "$env:TEMP\Sysmon\Sysmon64.exe" -accepteula -i
 
-#& "$env:TEMP\Sysmon\Sysmon64.exe" -accepteula -i sysmonconfig.xml
+& "$env:TEMP\Sysmon\Sysmon64.exe" -accepteula -i "$env:TEMP\Sysmon\sysmonconfig.xml"
 
 #For changing the configuration file run
 #sysmon -c C:\configs\sysmonconfig.xml
