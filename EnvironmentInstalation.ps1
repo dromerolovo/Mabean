@@ -54,3 +54,4 @@ Set-MpPreference -PUAProtection AuditMode
 Set-MpPreference -EnableControlledFolderAccess AuditMode
 Set-MpPreference -EnableNetworkProtection AuditMode
 Set-MpPreference -MAPSReporting Advanced
+Set-MpPreference -SubmitSamplesConsent SendSafeSamples
