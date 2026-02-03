@@ -1,0 +1,52 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+			 xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+			 xmlns:local="using:Mabean.Views"
+			 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+			 mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+			 xmlns:shadui="clr-namespace:ShadUI;assembly=ShadUI"
+			 x:Class="Mabean.Views.BehaviorSimulationView"
+			 xmlns:vm="using:Mabean.ViewModels"
+			 x:DataType="vm:BehaviorSimulationViewModel">
+	<Border Padding="20">
+		<StackPanel HorizontalAlignment="Left" VerticalAlignment="Top">
+			<TextBlock
+			Classes="h4"
+			Text="Simulate a behavior"
+			TextWrapping="Wrap" />
+			<Border Height="12"/>
+			<TextBlock
+			FontSize="14"
+			Text="Choose a type:"
+			TextWrapping="Wrap" />
+			<Border Height="12"/>
+			<ComboBox Width="255" SelectedIndex="0"
+					  ItemsSource="{Binding Behaviors}"
+					  SelectedItem="{Binding SelectedBehavior}">
+			</ComboBox>
+			<Border Height="12"/>
+			<TextBlock
+			FontSize="14"
+			Text="Choose a payload ( If apply) :"
+			TextWrapping="Wrap" />
+			<Border Height="12"/>
+			<ComboBox Width="255" SelectedIndex="0"
+					  ItemsSource="{Binding Payloads}"
+					  SelectedItem="{Binding SelectedPayload}">
+			</ComboBox>
+			<Border Height="12"/>
+			<TextBox
+			shadui:ControlAssist.Label="Puid ( If apply )"
+			Text="{Binding Puid}"
+			HorizontalAlignment="Left"
+			Watermark="Process ID" />
+			<Border Height="12"/>
+			<Button
+			Command="{Binding ExecuteBehaviorCommand}"
+			Classes="Primary"
+			Content="Execute" />
+		</StackPanel>
+	</Border>
+
+
+</UserControl>
