@@ -26,12 +26,15 @@ public partial class App : Application
     {
         var services = new ServiceCollection();
 
+        services.AddHostedService<EventsService>();
+
         services.AddSingleton<MainWindowViewModel>();
         services.AddTransient<HomeViewModel>();
         services.AddTransient<KeysManagmentViewModel>();
         services.AddTransient<PayloadManagerViewModel>();
         services.AddTransient<BehaviorSimulationViewModel>();
         services.AddTransient<SimulateBehaviorService>();
+        services.AddTransient<EventsViewModel>();
 
         services.AddSingleton<PayloadService>();
 

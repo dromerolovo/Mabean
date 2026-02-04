@@ -13,6 +13,9 @@ namespace Mabean.Services
 
         public static void Init()
         {
+            if (Avalonia.Controls.Design.IsDesignMode)
+                return;
+
             if (_writer != null)
                 throw new InvalidOperationException("Logger already initialized");
 
