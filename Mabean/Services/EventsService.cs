@@ -2,10 +2,12 @@
 using Microsoft.Extensions.Hosting;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.Eventing.Reader;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Runtime.InteropServices;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -38,8 +40,26 @@ namespace Mabean.Services
             {
                 if(RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 {
+                    var process = Process.GetCurrentProcess();
+                    var processId = Process.GetCurrentProcess().Id;
+
+                    string processPath = process.MainModule.FileName;
+
+                    var xpathQuery = $@"
+*[System[Provider[@Name='Microsoft-Windows-Sysmon']]]
+[EventData[
+  Data[@Name='ProcessId']='{processId}' or
+  Data[@Name='ParentProcessId']='{processId}' or
+  Data[@Name='SourceProcessId']='{processId}' or
+  Data[@Name='TargetProcessId']='{processId}' or
+  Data[@Name='Image']='{processPath}' or
+  Data[@Name='ParentImage']='{processPath}'
+]]
+";
+
+
                     //Research more about events query(Win32 api) and XPath
-                    var query = new EventLogQuery(_sysmonLogName, PathType.LogName, "*");
+                    var query = new EventLogQuery(_sysmonLogName, PathType.LogName, xpathQuery);
                     _watcher = new EventLogWatcher(query);
                     _watcher.EventRecordWritten += OnEventRecordWritten;
                     _watcher.Enabled = true;

@@ -30,11 +30,16 @@ namespace Mabean.ViewModels
         private void Subscribe()
         {
             _subscription = _eventsService.EventStream
+                .Buffer(TimeSpan.FromMilliseconds(100))
                 .Subscribe(@event =>
                 {
                     Dispatcher.UIThread.Post(() =>
                     {
-                        SecurityEvents.Insert(0, @event);
+                        foreach (var singleEvent in @event)
+                        {
+                            SecurityEvents.Insert(0, singleEvent);
+                        }
+
                         while (SecurityEvents.Count > _maxSecurityEvents)
                         {
                             SecurityEvents.RemoveAt(SecurityEvents.Count - 1);
