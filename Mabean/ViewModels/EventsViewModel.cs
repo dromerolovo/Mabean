@@ -44,7 +44,7 @@ namespace Mabean.ViewModels
         }
 
         [RelayCommand]
-        private void ClearEvents() => Events.Clear();
+        private void ClearEvents() => SecurityEvents.Clear();
 
         public void Dispose()
         {

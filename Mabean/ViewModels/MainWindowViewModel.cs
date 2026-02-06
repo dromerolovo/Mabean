@@ -11,7 +11,7 @@ public partial class MainWindowViewModel : ViewModelBase
     public KeysManagmentViewModel KeysManagmentViewModel { get; } 
     public PayloadManagerViewModel PayloadManagerViewModel { get; } 
     public BehaviorSimulationViewModel BehaviorSimulationViewModel { get; }
-    public EventsViewModel EventsViewModel { get; } = new();
+    public EventsViewModel EventsViewModel { get; }
 
     public MainWindowViewModel(KeysManagmentViewModel keysManagmentViewModel, 
         PayloadManagerViewModel payloadManagerViewModel, 
@@ -22,7 +22,7 @@ public partial class MainWindowViewModel : ViewModelBase
         PayloadManagerViewModel = payloadManagerViewModel;
         BehaviorSimulationViewModel = behaviorSimulationViewModel;
         _currentPage = HomeViewModel;
-        EventsViewModel = EventsViewModel;
+        EventsViewModel = eventsViewModel;
     }
     public string Greeting { get; } = "Welcome to Avalonia!";
 

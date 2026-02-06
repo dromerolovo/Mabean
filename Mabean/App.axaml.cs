@@ -1,22 +1,25 @@
-using Avalonia;
+﻿using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Data.Core;
 using Avalonia.Data.Core.Plugins;
-using Avalonia.Logging;
 using Avalonia.Markup.Xaml;
 using Mabean.Interop;
 using Mabean.Services;
 using Mabean.ViewModels;
 using Mabean.Views;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Mabean;
 
 public partial class App : Application
 {
-    public static IServiceProvider Services { get; set; }
+    public static IHost Host { get; private set; } = null!;
+    public static IServiceProvider Services => Host.Services;
+
     public override void Initialize()
     {
         AvaloniaXamlLoader.Load(this);
@@ -24,21 +27,28 @@ public partial class App : Application
 
     public override void OnFrameworkInitializationCompleted()
     {
-        var services = new ServiceCollection();
 
-        services.AddHostedService<EventsService>();
+        Host = Microsoft.Extensions.Hosting.Host
+            .CreateDefaultBuilder()
+            .ConfigureServices(services =>
+            {
+                services.AddSingleton<EventsService>();
+                services.AddHostedService(sp => sp.GetRequiredService<EventsService>());
 
-        services.AddSingleton<MainWindowViewModel>();
-        services.AddTransient<HomeViewModel>();
-        services.AddTransient<KeysManagmentViewModel>();
-        services.AddTransient<PayloadManagerViewModel>();
-        services.AddTransient<BehaviorSimulationViewModel>();
-        services.AddTransient<SimulateBehaviorService>();
-        services.AddTransient<EventsViewModel>();
+                services.AddSingleton<MainWindowViewModel>();
+                services.AddTransient<HomeViewModel>();
+                services.AddTransient<KeysManagmentViewModel>();
+                services.AddTransient<PayloadManagerViewModel>();
+                services.AddTransient<BehaviorSimulationViewModel>();
+                services.AddTransient<EventsViewModel>();
 
-        services.AddSingleton<PayloadService>();
+                services.AddSingleton<PayloadService>();
+                services.AddTransient<SimulateBehaviorService>();
+            })
+            .Build();
 
-        Services = services.BuildServiceProvider();
+        Host.Start(); 
+
         LoggerService.Init();
         InteropInit.Init();
 
@@ -46,13 +56,13 @@ public partial class App : Application
 
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
-            desktop.Exit += (_, _) =>
+            desktop.Exit += async (_, _) =>
             {
-                LoggerService.Shutdown();
+                await ShutdownAsync();
             };
-            // Avoid duplicate validations from both Avalonia and the CommunityToolkit. 
-            // More info: https://docs.avaloniaui.net/docs/guides/development-guides/data-validation#manage-validationplugins
+
             DisableAvaloniaDataAnnotationValidation();
+
             desktop.MainWindow = new MainWindow
             {
                 DataContext = Services.GetRequiredService<MainWindowViewModel>()
@@ -62,13 +72,29 @@ public partial class App : Application
         base.OnFrameworkInitializationCompleted();
     }
 
-    private void DisableAvaloniaDataAnnotationValidation()
+    private static async Task ShutdownAsync()
     {
-        // Get an array of plugins to remove
-        var dataValidationPluginsToRemove =
-            BindingPlugins.DataValidators.OfType<DataAnnotationsValidationPlugin>().ToArray();
+        try
+        {
+            if (Host != null)
+            {
+                await Host.StopAsync();
+                Host.Dispose();
+            }
+        }
+        finally
+        {
+            LoggerService.Shutdown();
+        }
+    }
 
-        // remove each entry found
+    private static void DisableAvaloniaDataAnnotationValidation()
+    {
+        var dataValidationPluginsToRemove =
+            BindingPlugins.DataValidators
+                .OfType<DataAnnotationsValidationPlugin>()
+                .ToArray();
+
         foreach (var plugin in dataValidationPluginsToRemove)
         {
             BindingPlugins.DataValidators.Remove(plugin);

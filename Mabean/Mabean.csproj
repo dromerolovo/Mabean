@@ -9,6 +9,7 @@
 
   <ItemGroup>
     <AvaloniaResource Include="Assets\**" />
+    <None Remove="nul" />
     <Folder Include="Controls\" />
   </ItemGroup>
 

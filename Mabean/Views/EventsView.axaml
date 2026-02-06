@@ -1,8 +1,136 @@
 <UserControl xmlns="https://github.com/avaloniaui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-             x:Class="Mabean.Views.EventsView">
-  Welcome to Avalonia!
+			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+			 xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+			 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+			 xmlns:shadui="clr-namespace:ShadUI;assembly=ShadUI"
+			 xmlns:vm="clr-namespace:Mabean.ViewModels"
+			 xmlns:models="clr-namespace:Mabean.Models"
+			 mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+			 x:Class="Mabean.Views.EventsView"
+			 x:DataType="vm:EventsViewModel">
+
+	<Border Padding="20">
+		<StackPanel HorizontalAlignment="Left" VerticalAlignment="Top">
+			<TextBlock
+			Classes="h4"
+			Text="Security Events"
+			TextWrapping="Wrap" />
+			<Border Height="12"></Border>
+			<ScrollViewer HorizontalScrollBarVisibility="Auto">
+				<StackPanel HorizontalAlignment="Stretch"
+							Spacing="16">
+
+					<!-- Header: clear button -->
+					<Grid ColumnDefinitions="* Auto">
+						<Button
+							Grid.Column="1"
+							Classes="Outline"
+							Command="{Binding ClearEventsCommand}"
+							Content="Clear Events" />
+					</Grid>
+
+					<!-- DataGrid -->
+					<DataGrid
+						x:Name="EventsDataGrid"
+						CanUserReorderColumns="False"
+						CanUserResizeColumns="True"
+						CanUserSortColumns="True"
+						GridLinesVisibility="Horizontal"
+						IsReadOnly="True"
+						ItemsSource="{Binding SecurityEvents}"
+						SelectionMode="Single">
+						<DataGrid.Columns>
+
+							<DataGridTextColumn
+								Width="100"
+								Binding="{Binding RecordId}"
+								Header="Record ID" />
+
+							<DataGridTemplateColumn
+								Width="170"
+								Header="Time Created"
+								SortMemberPath="TimeCreated">
+								<DataGridTemplateColumn.CellTemplate>
+									<DataTemplate DataType="models:SecurityEvent">
+										<TextBlock
+											Margin="12,0"
+											VerticalAlignment="Center"
+											Text="{Binding TimeCreated, StringFormat={}{0:yyyy-MM-dd HH:mm:ss}}" />
+									</DataTemplate>
+								</DataGridTemplateColumn.CellTemplate>
+							</DataGridTemplateColumn>
+
+							<DataGridTextColumn
+								Width="80"
+								Binding="{Binding EventId}"
+								Header="Event ID" />
+
+							<DataGridTextColumn
+								Width="200"
+								Binding="{Binding Source}"
+								Header="Source" />
+
+							<DataGridTextColumn
+								Width="150"
+								Binding="{Binding TaskCategory}"
+								Header="Category" />
+
+							<DataGridTemplateColumn
+								Width="*"
+								CanUserSort="False"
+								Header="Message">
+								<DataGridTemplateColumn.CellTemplate>
+									<DataTemplate DataType="models:SecurityEvent">
+										<TextBlock
+											Margin="12,0"
+											VerticalAlignment="Center"
+											Text="{Binding Message}"
+											TextTrimming="CharacterEllipsis"
+											ToolTip.Tip="{Binding Message}" />
+									</DataTemplate>
+								</DataGridTemplateColumn.CellTemplate>
+							</DataGridTemplateColumn>
+
+							<DataGridTemplateColumn
+								CanUserResize="False"
+								CanUserSort="False">
+								<DataGridTemplateColumn.CellTemplate>
+									<DataTemplate DataType="models:SecurityEvent">
+										<shadui:SimpleDropdown
+											HorizontalAlignment="Center"
+											VerticalAlignment="Center"
+											Classes="Icon Grid"
+											CornerRadius="{DynamicResource MdCornerRadius}"
+											PopupPlacement="BottomEdgeAlignedLeft"
+											PopupWidth="190">
+											<shadui:SimpleDropdown.TriggerContent>
+												<TextBlock Classes="LucideIcon" Text="&#57530;" />
+											</shadui:SimpleDropdown.TriggerContent>
+											<shadui:SimpleDropdown.MenuLabel>
+												<TextBlock Classes="Caption Muted" Text="Actions" />
+											</shadui:SimpleDropdown.MenuLabel>
+											<Separator />
+											<Button Content="Copy Record ID" />
+											<Button Content="View Details" />
+										</shadui:SimpleDropdown>
+									</DataTemplate>
+								</DataGridTemplateColumn.CellTemplate>
+							</DataGridTemplateColumn>
+
+						</DataGrid.Columns>
+					</DataGrid>
+
+					<!-- Footer -->
+					<TextBlock VerticalAlignment="Center" Classes="Small Muted">
+						<Run Text="{Binding SecurityEvents.Count, Mode=OneWay}" />
+						<Run Text="event(s) captured." />
+					</TextBlock>
+
+				</StackPanel>
+			</ScrollViewer>
+
+		</StackPanel>
+	</Border>
+
+
 </UserControl>
