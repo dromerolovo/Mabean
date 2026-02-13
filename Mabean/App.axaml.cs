@@ -3,6 +3,7 @@ using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Data.Core;
 using Avalonia.Data.Core.Plugins;
 using Avalonia.Markup.Xaml;
+using Mabean.Abstract;
 using Mabean.Interop;
 using Mabean.Services;
 using Mabean.ViewModels;
@@ -35,6 +36,7 @@ public partial class App : Application
                 services.AddSingleton<EventsService>();
                 services.AddHostedService(sp => sp.GetRequiredService<EventsService>());
 
+                services.AddTransient<IAiService, SemanticKernelService>();
                 services.AddSingleton<MainWindowViewModel>();
                 services.AddTransient<HomeViewModel>();
                 services.AddTransient<KeysManagmentViewModel>();
@@ -44,6 +46,7 @@ public partial class App : Application
 
                 services.AddSingleton<PayloadService>();
                 services.AddTransient<SimulateBehaviorService>();
+                
             })
             .Build();
 
@@ -63,10 +66,21 @@ public partial class App : Application
 
             DisableAvaloniaDataAnnotationValidation();
 
-            desktop.MainWindow = new MainWindow
+            try
             {
-                DataContext = Services.GetRequiredService<MainWindowViewModel>()
-            };
+                desktop.MainWindow = new MainWindow
+                {
+                    DataContext = Services.GetRequiredService<MainWindowViewModel>()
+                };
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Exception during MainWindow initialization: {ex}");
+                Console.Error.WriteLine(ex);
+                throw;
+            }
+
+
         }
 
         base.OnFrameworkInitializationCompleted();

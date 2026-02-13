@@ -4,13 +4,14 @@ using System.Text;
 
 namespace Mabean.Models
 {
-    public record SecurityEvent
+    public class SecurityEvent
     {
-        public long RecordId { get; init; }
-        public DateTime TimeCreated { get; init; }
-        public int EventId { get; init; }
-        public string Source { get; init; } = string.Empty;
-        public string TaskCategory { get; init; } = string.Empty;
-        public string Message { get; init; } = string.Empty;
+        public long RecordId { get; set; }
+        public DateTime TimeCreated { get; set; }
+        public int EventId { get; set; }
+        public string Source { get; set; } = string.Empty;
+        public string TaskCategory { get; set; } = string.Empty;
+        public string Message { get; set; } = string.Empty;
+        public bool IsSelected { get; set; } = false;
     }
 }

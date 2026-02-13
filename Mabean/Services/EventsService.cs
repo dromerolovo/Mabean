@@ -46,16 +46,16 @@ namespace Mabean.Services
                     string processPath = process.MainModule.FileName;
 
                     var xpathQuery = $@"
-*[System[Provider[@Name='Microsoft-Windows-Sysmon']]]
-[EventData[
-  Data[@Name='ProcessId']='{processId}' or
-  Data[@Name='ParentProcessId']='{processId}' or
-  Data[@Name='SourceProcessId']='{processId}' or
-  Data[@Name='TargetProcessId']='{processId}' or
-  Data[@Name='Image']='{processPath}' or
-  Data[@Name='ParentImage']='{processPath}'
-]]
-";
+                    *[System[Provider[@Name='Microsoft-Windows-Sysmon']]]
+                    [EventData[
+                      Data[@Name='ProcessId']='{processId}' or
+                      Data[@Name='ParentProcessId']='{processId}' or
+                      Data[@Name='SourceProcessId']='{processId}' or
+                      Data[@Name='TargetProcessId']='{processId}' or
+                      Data[@Name='Image']='{processPath}' or
+                      Data[@Name='ParentImage']='{processPath}'
+                    ]]
+                    ";
 
 
                     //Research more about events query(Win32 api) and XPath
