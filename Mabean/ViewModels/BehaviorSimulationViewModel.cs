@@ -24,7 +24,9 @@ namespace Mabean.ViewModels
         [ObservableProperty]
         private ObservableCollection<string> _behaviors = new ObservableCollection<string>()
         {
-            "Injection-Simple"
+            "Injection-Simple",
+            "Injection-Apc-MultiThreaded",
+            "Injection-Apc-EarlyBird"
         };
 
         [ObservableProperty]
@@ -34,6 +36,10 @@ namespace Mabean.ViewModels
         private string _selectedPayload = "";
         [ObservableProperty]
         private uint _puid = default;
+
+        [ObservableProperty]
+        private string _programName = "";
+
         public BehaviorSimulationViewModel(PayloadService payloadService, SimulateBehaviorService simulateBehaviorService)
         {
             _payloadService = payloadService;
@@ -54,8 +60,9 @@ namespace Mabean.ViewModels
         [RelayCommand]
         private async Task ExecuteBehavior()
         {
+            Console.WriteLine(ProgramName);
             LoggerService.Write($"[+] Executing behavior: {SelectedBehavior} into process with PUID: {Puid} using payload: {SelectedPayload}");
-            await _simulateBehaviorService.InjectBehavior(Puid, SelectedBehavior, SelectedPayload);
+            await _simulateBehaviorService.InjectBehavior(Puid, SelectedBehavior, SelectedPayload, ProgramName);
         }
     }
 }

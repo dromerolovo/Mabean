@@ -31,6 +31,7 @@ public partial class App : Application
 
         Host = Microsoft.Extensions.Hosting.Host
             .CreateDefaultBuilder()
+            .UseEnvironment("Development")
             .ConfigureServices(services =>
             {
                 services.AddSingleton<EventsService>();

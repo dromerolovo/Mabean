@@ -41,11 +41,16 @@ namespace Mabean.Services
                 "Critical, Extreme, Immediate Threat");
             _history.AddSystemMessage("Your response will be a JSON, where one key is the SuspiciousnessName key where the value is going to be" +
                 "one of the 10 values previously discuessed, and the other it's going to be your analysis with the key Analysis, and the value: " +
-                "your explanation of why this behavior is like that. Don't consider the sandbox environment or Mabean.exe or the dlls, just focus on the behavior");
+                "your explanation of why this behavior is like that. Don't consider the sandbox environment or Mabean.exe or the different dlls for your analysis, just focus on the behavior");
         }
 
         public async Task<string> SendMessageAsync(string userMessage)
         {
+            for (int i = _history.Count - 1; i >= 0; i--)
+            {
+                if (_history[i].Role != AuthorRole.System) _history.RemoveAt(i);
+            }
+
             _history.AddUserMessage(userMessage);
 
             var response = await _chat.GetChatMessageContentAsync(_history);

@@ -27,7 +27,7 @@
 			<Border Height="12"/>
 			<TextBlock
 			FontSize="14"
-			Text="Choose a payload ( If apply) :"
+			Text="Choose a payload ( If applicable) :"
 			TextWrapping="Wrap" />
 			<Border Height="12"/>
 			<ComboBox Width="255" SelectedIndex="0"
@@ -36,10 +36,16 @@
 			</ComboBox>
 			<Border Height="12"/>
 			<TextBox
-			shadui:ControlAssist.Label="Puid ( If apply )"
+			shadui:ControlAssist.Label="Puid ( If applicable )"
 			Text="{Binding Puid}"
 			HorizontalAlignment="Left"
 			Watermark="Process ID" />
+			<Border Height="12"/>
+			<TextBox
+			shadui:ControlAssist.Label="Program name (If applicable)"
+			Text="{Binding ProgramName}"
+			HorizontalAlignment="Left"
+			Watermark="Program name" />
 			<Border Height="12"/>
 			<Button
 			Command="{Binding ExecuteBehaviorCommand}"

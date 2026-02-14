@@ -11,17 +11,39 @@ namespace Mabean.Interop
     {
         public static void Init()
         {
-            string dllPath = Path.Combine(Paths.Injection, "SimpleDll.dll");
-            NativeLibrary.Load(dllPath);
+            string dllInjection = Path.Combine(Paths.Dlls, "1.dll");
+            NativeLibrary.Load(dllInjection);
         }
 
-        [DllImport("SimpleDll.dll",
+        [DllImport("1.dll",
             CallingConvention = CallingConvention.Cdecl,
             ExactSpelling = true)]
-                public static extern int InjectPayload(
+                public static extern int InjectPayloadSimple(
             uint pid,
             byte[] payload,
             uint length
         );
+
+        [DllImport("1.dll",
+            CallingConvention = CallingConvention.Cdecl,
+            ExactSpelling = true)]
+                public static extern int InjectPayloadApcMultiThreaded(
+            uint pid,
+            byte[] payload,
+            nuint length
+        );
+
+        [DllImport("1.dll",
+            CallingConvention = CallingConvention.Cdecl,
+            ExactSpelling = true)]
+                public static extern int InjectPayloadApcEarlyBird(
+            string programName,
+            byte[] payload,
+            nuint length
+        );
+
+        
+
+
     }
 }

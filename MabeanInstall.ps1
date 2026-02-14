@@ -6,7 +6,6 @@ $payloadsDir = Join-Path $dataDir "payloads"
 $configJsonPath = Join-Path $payloadsDir "payloads.json"
 
 $dlls = Join-Path $dataDir "Dlls"
-$injection = Join-Path $dlls "injection"
 
 $logs = Join-Path $dataDir "Logs"
 
@@ -29,10 +28,6 @@ if (-Not (Test-Path $configJsonPath)) {
 
 if (-Not (Test-Path $dlls)) {
     New-Item -ItemType Directory -Path $dlls | Out-Null
-}
-
-if (-Not (Test-Path $injection)) {
-    New-Item -ItemType Directory -Path $injection | Out-Null
 }
 
 if (-Not (Test-Path $logs)) {
