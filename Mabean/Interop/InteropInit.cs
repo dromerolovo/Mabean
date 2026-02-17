@@ -11,6 +11,7 @@ namespace Mabean.Interop
         public static void Init()
         {
             InteropInjection.Init();
+            InteropPrivilegeEscalation.Init();
         }
     }
 }

@@ -26,11 +26,12 @@ namespace Mabean.ViewModels
         {
             "Injection-Simple",
             "Injection-Apc-MultiThreaded",
-            "Injection-Apc-EarlyBird"
+            "Injection-Apc-EarlyBird",
+            "PrivilegeEscalation-TokenTheft"
         };
 
         [ObservableProperty]
-        private string _selectedBehavior = "";
+        private string _selectedBehavior = "Injection-Simple";
 
         [ObservableProperty]
         private string _selectedPayload = "";
@@ -39,6 +40,10 @@ namespace Mabean.ViewModels
 
         [ObservableProperty]
         private string _programName = "";
+
+        public bool ShowPayloadField => SelectedBehavior.StartsWith("Injection");
+        public bool ShowProgramNameField => SelectedBehavior.Equals("Injection-Apc-EarlyBird");
+        public bool ShowPuidField => !SelectedBehavior.Equals("Injection-Apc-EarlyBird");
 
         public BehaviorSimulationViewModel(PayloadService payloadService, SimulateBehaviorService simulateBehaviorService)
         {
@@ -63,6 +68,13 @@ namespace Mabean.ViewModels
             Console.WriteLine(ProgramName);
             LoggerService.Write($"[+] Executing behavior: {SelectedBehavior} into process with PUID: {Puid} using payload: {SelectedPayload}");
             await _simulateBehaviorService.InjectBehavior(Puid, SelectedBehavior, SelectedPayload, ProgramName);
+        }
+
+        partial void OnSelectedBehaviorChanged(string value)
+        {
+            OnPropertyChanged(nameof(ShowPuidField));
+            OnPropertyChanged(nameof(ShowProgramNameField));
+            OnPropertyChanged(nameof(ShowPayloadField));
         }
     }
 }

