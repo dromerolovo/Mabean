@@ -19,6 +19,8 @@ namespace Mabean.Services
         private EventLogWatcher? _watcher;
         private const string _sysmonLogName = "Microsoft-Windows-Sysmon/Operational";
         private const int _maxEventsLimit = 500;
+        private const string _markerProcessExe = "MabeanMarker.exe";
+        private volatile bool _markerActivated = false;
 
         private readonly Subject<SecurityEvent> _eventSubject = new();
         //private readonly BehaviorSubject<string> _statusSubject = new("Starting...");
@@ -80,7 +82,29 @@ namespace Mabean.Services
             if (e.EventRecord == null) return;
 
             using var record = e.EventRecord;
+
+            var message = record.FormatDescription() ?? string.Empty;
+
+            if(message.Contains(_markerProcessExe, StringComparison.OrdinalIgnoreCase))
+            {
+                if(!_markerActivated)
+                {
+                    Console.WriteLine("Marker Activated");
+                    _markerActivated = true;
+                } else
+                {
+                    Console.WriteLine("Marker Deactivated");
+                    //TODO: Very unstable, find a better way to avoid getting the powershell related events 
+                    _ = Task.Delay(3000).ContinueWith(_ => _markerActivated = false);
+                }
+                return;
+            }
+
+            if (_markerActivated) return;
+
             if (record == null) return;
+
+            Console.WriteLine($"Pwsh event");
             var @event = new SecurityEvent
             {
                 RecordId = record.RecordId ?? 0,

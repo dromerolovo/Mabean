@@ -28,7 +28,7 @@
 			<StackPanel IsVisible="{Binding ShowPayloadField}">
 				<TextBlock
 				FontSize="14"
-				Text="Choose a payload ( If applicable) :"
+				Text="Choose a payload:"
 				TextWrapping="Wrap" />
 				<Border Height="12"/>
 				<ComboBox Width="255" SelectedIndex="0"
@@ -40,7 +40,7 @@
 
 			<StackPanel IsVisible="{Binding ShowPuidField}">
 				<TextBox
-				shadui:ControlAssist.Label="Puid ( If applicable )"
+				shadui:ControlAssist.Label="Puid:"
 				Text="{Binding Puid}"
 				HorizontalAlignment="Left"
 				Watermark="Process ID" />
@@ -48,7 +48,7 @@
 			</StackPanel>
 			<StackPanel IsVisible="{Binding ShowProgramNameField}">
 				<TextBox
-				shadui:ControlAssist.Label="Program name (If applicable)"
+				shadui:ControlAssist.Label="Program name:"
 				Text="{Binding ProgramName}"
 				HorizontalAlignment="Left"
 				Watermark="Program name" />

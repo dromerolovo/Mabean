@@ -26,6 +26,9 @@
 		<DataTemplate DataType="{x:Type vm:EventsViewModel}">
 			<views:EventsView />
 		</DataTemplate>
+		<DataTemplate DataType="{x:Type vm:ProcessFinderViewModel}">
+			<views:ProcessFinderView />
+		</DataTemplate>
 
 	</Application.DataTemplates>
 </Application>

@@ -1,0 +1,67 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:shadui="clr-namespace:ShadUI;assembly=ShadUI"
+             xmlns:vm="using:Mabean.ViewModels"
+             xmlns:models="clr-namespace:Mabean.Models"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="Mabean.Views.ProcessFinderView"
+             x:DataType="vm:ProcessFinderViewModel"
+             VerticalAlignment="Stretch"
+             HorizontalAlignment="Stretch">
+
+    <Border Padding="20">
+        <DockPanel>
+
+            <TextBlock DockPanel.Dock="Top"
+                       Classes="h4"
+                       Text="Process Finder" />
+
+            <Border DockPanel.Dock="Top" Height="12" />
+
+            <StackPanel DockPanel.Dock="Top"
+                        Orientation="Horizontal"
+                        HorizontalAlignment="Right"
+                        Margin="0,0,0,16">
+                <Button Classes="Outline"
+                        Command="{Binding LoadProcessesCommand}"
+                        IsEnabled="{Binding !IsLoading}"
+                        Content="Refresh" />
+            </StackPanel>
+
+            <TextBlock DockPanel.Dock="Bottom"
+                       Margin="0,16,0,0"
+                       Classes="Small Muted">
+                <Run Text="{Binding Processes.Count}" />
+                <Run Text=" process(es) found." />
+            </TextBlock>
+
+            <DataGrid ItemsSource="{Binding Processes}"
+                      IsReadOnly="True"
+                      SelectionMode="Single"
+                      RowHeight="44"
+                      HeadersVisibility="Column"
+                      VerticalScrollBarVisibility="Auto"
+                      HorizontalScrollBarVisibility="Auto">
+                <DataGrid.Columns>
+
+                    <DataGridTextColumn Width="80"
+                                        Header="PID"
+                                        Binding="{Binding ProcessId}" />
+
+                    <DataGridTextColumn Width="*"
+                                        Header="Name"
+                                        Binding="{Binding ProcessName}" />
+
+                    <DataGridTextColumn Width="200"
+                                        Header="User"
+                                        Binding="{Binding UserName}" />
+
+                </DataGrid.Columns>
+            </DataGrid>
+
+        </DockPanel>
+    </Border>
+
+</UserControl>

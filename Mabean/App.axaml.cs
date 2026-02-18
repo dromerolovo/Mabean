@@ -44,10 +44,13 @@ public partial class App : Application
                 services.AddTransient<PayloadManagerViewModel>();
                 services.AddTransient<BehaviorSimulationViewModel>();
                 services.AddTransient<EventsViewModel>();
+                services.AddTransient<ProcessFinderViewModel>();
 
+                services.AddSingleton<ProcessFinderService>();
                 services.AddSingleton<PayloadService>();
                 services.AddTransient<SimulateBehaviorService>();
                 
+
             })
             .Build();
 
