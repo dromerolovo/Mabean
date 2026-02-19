@@ -12,15 +12,15 @@
              HorizontalAlignment="Stretch">
 
     <Border Padding="20">
-        <DockPanel>
+        <Grid RowDefinitions="Auto Auto Auto * Auto">
 
-            <TextBlock DockPanel.Dock="Top"
+            <TextBlock Grid.Row="0"
                        Classes="h4"
                        Text="Process Finder" />
 
-            <Border DockPanel.Dock="Top" Height="12" />
+            <Border Grid.Row="1" Height="12" />
 
-            <StackPanel DockPanel.Dock="Top"
+            <StackPanel Grid.Row="2"
                         Orientation="Horizontal"
                         HorizontalAlignment="Right"
                         Margin="0,0,0,16">
@@ -30,38 +30,57 @@
                         Content="Refresh" />
             </StackPanel>
 
-            <TextBlock DockPanel.Dock="Bottom"
+            <DataGrid Grid.Row="3"
+                      ItemsSource="{Binding Processes}"
+                      IsReadOnly="True"
+                      SelectionMode="Single"
+                      RowHeight="44"
+                      HeadersVisibility="Column"
+                      VerticalScrollBarVisibility="Visible"
+                      HorizontalScrollBarVisibility="Auto">
+                <DataGrid.Columns>
+
+                    <DataGridTemplateColumn Width="80" Header="PID">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <SelectableTextBlock Text="{Binding ProcessId}"
+                                                     VerticalAlignment="Center"
+                                                     Margin="12,0" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                    <DataGridTemplateColumn Width="600" Header="Name">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <SelectableTextBlock Text="{Binding ProcessName}"
+                                                     VerticalAlignment="Center"
+                                                     Margin="12,0" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                    <DataGridTemplateColumn Width="400" Header="User">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <SelectableTextBlock Text="{Binding UserName}"
+                                                     VerticalAlignment="Center"
+                                                     Margin="12,0" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                </DataGrid.Columns>
+            </DataGrid>
+
+            <TextBlock Grid.Row="4"
                        Margin="0,16,0,0"
                        Classes="Small Muted">
                 <Run Text="{Binding Processes.Count}" />
                 <Run Text=" process(es) found." />
             </TextBlock>
 
-            <DataGrid ItemsSource="{Binding Processes}"
-                      IsReadOnly="True"
-                      SelectionMode="Single"
-                      RowHeight="44"
-                      HeadersVisibility="Column"
-                      VerticalScrollBarVisibility="Auto"
-                      HorizontalScrollBarVisibility="Auto">
-                <DataGrid.Columns>
-
-                    <DataGridTextColumn Width="80"
-                                        Header="PID"
-                                        Binding="{Binding ProcessId}" />
-
-                    <DataGridTextColumn Width="600"
-                                        Header="Name"
-                                        Binding="{Binding ProcessName}" />
-
-                    <DataGridTextColumn Width="400"
-                                        Header="User"
-                                        Binding="{Binding UserName}" />
-
-                </DataGrid.Columns>
-            </DataGrid>
-
-        </DockPanel>
+        </Grid>
     </Border>
 
 </UserControl>
