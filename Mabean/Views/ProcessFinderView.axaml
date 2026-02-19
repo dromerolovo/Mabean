@@ -50,11 +50,11 @@
                                         Header="PID"
                                         Binding="{Binding ProcessId}" />
 
-                    <DataGridTextColumn Width="*"
+                    <DataGridTextColumn Width="600"
                                         Header="Name"
                                         Binding="{Binding ProcessName}" />
 
-                    <DataGridTextColumn Width="200"
+                    <DataGridTextColumn Width="400"
                                         Header="User"
                                         Binding="{Binding UserName}" />
 

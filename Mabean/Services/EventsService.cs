@@ -95,7 +95,7 @@ namespace Mabean.Services
                 {
                     Console.WriteLine("Marker Deactivated");
                     //TODO: Very unstable, find a better way to avoid getting the powershell related events 
-                    _ = Task.Delay(3000).ContinueWith(_ => _markerActivated = false);
+                    _ = Task.Delay(4000).ContinueWith(_ => _markerActivated = false);
                 }
                 return;
             }
