@@ -28,6 +28,11 @@ mono_crash.*
 [Rr]elease/
 [Rr]eleases/
 x64/
+MabeanScripts/**/[12]/**
+!MabeanScripts/**/x64/
+!MabeanScripts/**/x64/Release/
+!MabeanScripts/**/x64/Release/*.dll
+*.dll.recipe
 x86/
 [Ww][Ii][Nn]32/
 [Aa][Rr][Mm]/

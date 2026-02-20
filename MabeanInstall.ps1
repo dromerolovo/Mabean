@@ -34,6 +34,9 @@ if (-Not (Test-Path $logs)) {
     New-Item -ItemType Directory -Path $logs | Out-Null
 }
 
+Copy-Item ".\MabeanScripts\Injection\1\x64\Release\1.dll" -Destination (Join-Path $dlls "1.dll")  -Force
+Copy-Item ".\MabeanScripts\PrivilegeEscalation\2\x64\Release\2.dll" -Destination (Join-Path $dlls "2.dll")  -Force
+
 
 
 

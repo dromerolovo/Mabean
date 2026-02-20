@@ -10,18 +10,25 @@ if (-not $IsAdmin) {
 }
 
 #-------------------------------------Sysmon installation--------------------------------------------------
-Invoke-WebRequest -Uri "https://download.sysinternals.com/files/Sysmon.zip" -OutFile "$env:TEMP\Sysmon.zip"
 
-Expand-Archive -Path "$env:TEMP\Sysmon.zip" -DestinationPath "$env:TEMP\Sysmon" -Force
+$IsSysmonInstalled = [bool](Get-Service -Name "Sysmon*" -ErrorAction SilentlyContinue)
 
-Invoke-WebRequest -Uri "https://raw.githubusercontent.com/SwiftOnSecurity/sysmon-config/master/sysmonconfig-export.xml" -OutFile "$env:TEMP\Sysmon\sysmonconfig.xml"
+if(!$IsSysmonInstalled) {
+    Invoke-WebRequest -Uri "https://download.sysinternals.com/files/Sysmon.zip" -OutFile "$env:TEMP\Sysmon.zip"
 
-#& "$env:TEMP\Sysmon\Sysmon64.exe" -accepteula -i
+    Expand-Archive -Path "$env:TEMP\Sysmon.zip" -DestinationPath "$env:ProgramFiles\Sysmon" -Force
 
-& "$env:TEMP\Sysmon\Sysmon64.exe" -accepteula -i "$env:TEMP\Sysmon\sysmonconfig.xml"
+    Copy-Item -Path ".\sysmonconfig-export.xml" -Destination "$env:ProgramFiles\Sysmon"
 
-#For changing the configuration file run
-#sysmon -c C:\configs\sysmonconfig.xml
+    & "$env:ProgramFiles\Sysmon\Sysmon64.exe" -accepteula -i "$env:ProgramFiles\Sysmon\sysmonconfig-export.xml"
+
+    #For changing the configuration file run
+    #sysmon -c C:\configs\sysmonconfig.xml
+
+    Write-Host "Sysmon installed" -ForegroundColor Green
+} else {
+    Write-Host "Sysmon is already installed. Skipping instalation" -ForegroundColor Green
+}
 
 #-------------------------------------Set ASR rules to audit mode--------------------------------------------------
 #https://learn.microsoft.com/en-us/defender-endpoint/attack-surface-reduction-rules-reference#/asr-rule-to-guid-matrix
@@ -49,9 +56,24 @@ foreach ($rule in $ASRRules) {
     Add-MpPreference -AttackSurfaceReductionRules_Ids $rule -AttackSurfaceReductionRules_Actions AuditMode
 }
 
+Write-Host "Set ASR rules to Audit mode done" -ForegroundColor Green
+
 #-------------------------------------Set other Microsoft Defender components to Audit mode--------------------------------------------------
 Set-MpPreference -PUAProtection AuditMode
 Set-MpPreference -EnableControlledFolderAccess AuditMode
 Set-MpPreference -EnableNetworkProtection AuditMode
 Set-MpPreference -MAPSReporting Advanced
 Set-MpPreference -SubmitSamplesConsent SendSafeSamples
+
+Write-Host "Set MpPreference done" - ForegroundColor Green
+
+#--------------------------------------Dotnet installation---------------------------------------------------#
+$IsDotnetInstalled = [bool](Get-Command dotnet -ErrorAction SilentlyContinue)
+if(!$IsDotnetInstalled) {
+    $installScript = "$env:TEMP\dotnet-install.ps1"
+    Invoke-WebRequest -Uri "https://dot.net/v1/dotnet-install.ps1" -OutFile $installScript -UseBasicParsing
+    & $installScript -Channel "10.0" -InstallDir "$env:ProgramFiles\dotnet"
+    Write-Host "Dotnet installed successfully" -ForegroundColor Green
+} else {
+    Write-Host "Dotnet is already installed. Skipping instalation" -ForegroundColor Green
+}
