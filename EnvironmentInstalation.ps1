@@ -73,7 +73,27 @@ if(!$IsDotnetInstalled) {
     $installScript = "$env:TEMP\dotnet-install.ps1"
     Invoke-WebRequest -Uri "https://dot.net/v1/dotnet-install.ps1" -OutFile $installScript -UseBasicParsing
     & $installScript -Channel "10.0" -InstallDir "$env:ProgramFiles\dotnet"
+
+    $machinePath=[Environment]::GetEnvironmentVariable("Path","Machine")
+    if(-not ($machinePath -split ";" | Where-Object { $_.TrimEnd("\") -ieq $dotnetDir.TrimEnd("\") }))
+    { 
+        [Environment]::SetEnvironmentVariable("Path",$machinePath+";"+$dotnetDir,"Machine") 
+    }
+
     Write-Host "Dotnet installed successfully" -ForegroundColor Green
 } else {
     Write-Host "Dotnet is already installed. Skipping instalation" -ForegroundColor Green
 }
+
+#-------------------------------------Visual C++ Redistributable installation---------------------------------------------------
+$vcRedistKey = "HKLM:\SOFTWARE\Microsoft\VisualStudio\14.0\VC\Runtimes\x64" 
+$installed = (Test-Path $vcRedistKey) -and ((Get-ItemProperty $vcRedistKey -ErrorAction SilentlyContinue).Installed -eq 1)
+  if (-not $installed) {
+      $installer = "$env:TEMP\vc_redist.x64.exe"
+      Invoke-WebRequest -Uri "https://aka.ms/vs/17/release/vc_redist.x64.exe" -OutFile $installer -UseBasicParsing
+      Start-Process -FilePath $installer -ArgumentList "/install", "/quiet", "/norestart" -Wait
+      Remove-Item $installer -Force
+      Write-Host "VC++ Redistributable x64 installed" -ForegroundColor Green
+  } else {
+      Write-Host "VC++ Redistributable x64 already installed. Skipping" -ForegroundColor Green
+  }

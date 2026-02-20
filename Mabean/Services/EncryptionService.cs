@@ -13,7 +13,6 @@ namespace Mabean.Services
         {
             var key = await File.ReadAllBytesAsync(Paths.KeyBinPath);
 
-
             byte[] result = new byte[data.Length];
             for (int i = 0; i < data.Length; i++)
             {
