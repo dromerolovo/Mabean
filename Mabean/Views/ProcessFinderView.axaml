@@ -11,7 +11,7 @@
              VerticalAlignment="Stretch"
              HorizontalAlignment="Stretch">
 
-    <Border Padding="20" MaxHeight="{Binding $parent[Window].ClientSize.Height}">
+    <Border Padding="20">
         <Grid RowDefinitions="Auto Auto Auto * Auto" >
 
             <TextBlock Grid.Row="0"
@@ -31,7 +31,7 @@
             </StackPanel>
 
             <DataGrid Grid.Row="3"
-                      ItemsSource="{Binding Processes}"
+                      ItemsSource="{Binding PagedProcesses}"
                       IsReadOnly="True"
                       SelectionMode="Single"
                       HeadersVisibility="Column"
@@ -72,12 +72,27 @@
                 </DataGrid.Columns>
             </DataGrid>
 
-            <TextBlock Grid.Row="4"
-                       Margin="0,16,0,0"
-                       Classes="Small Muted">
-                <Run Text="{Binding Processes.Count}" />
-                <Run Text=" process(es) found." />
-            </TextBlock>
+            <Grid Grid.Row="4" ColumnDefinitions="* Auto" Margin="0,16,0,0">
+                <TextBlock VerticalAlignment="Center" Classes="Small Muted">
+                    <Run Text="Page" />
+                    <Run Text="{Binding CurrentPage}" />
+                    <Run Text="of" />
+                    <Run Text="{Binding TotalPages}" />
+                    <Run Text="—" />
+                    <Run Text="{Binding Processes.Count}" />
+                    <Run Text="process(es) found." />
+                </TextBlock>
+                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
+                    <Button Classes="Outline"
+                            Command="{Binding PreviousPageCommand}"
+                            IsEnabled="{Binding HasPreviousPage}"
+                            Content="Previous" />
+                    <Button Classes="Outline"
+                            Command="{Binding NextPageCommand}"
+                            IsEnabled="{Binding HasNextPage}"
+                            Content="Next" />
+                </StackPanel>
+            </Grid>
 
         </Grid>
     </Border>
