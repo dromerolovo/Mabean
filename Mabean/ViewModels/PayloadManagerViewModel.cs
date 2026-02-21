@@ -17,6 +17,8 @@ namespace Mabean.ViewModels
         private string _payloadCommand = "";
         [ObservableProperty]
         private bool _hasNoPayloads = false;
+        [ObservableProperty]
+        private string _payloadName = "";
 
         [ObservableProperty]
         private ObservableCollection<string> _payloads = new();
@@ -25,6 +27,17 @@ namespace Mabean.ViewModels
         {
             _payloadService = payloadService;
             _ = LoadPayloads();
+        }
+
+        [RelayCommand]
+        private async Task AddPayload()
+        {
+            if (!string.IsNullOrWhiteSpace(PayloadCommand))
+            {
+                await _payloadService.AddPayload(PayloadCommand, PayloadName);
+                PayloadCommand = "";
+                await LoadPayloads();
+            }
         }
 
         [RelayCommand]

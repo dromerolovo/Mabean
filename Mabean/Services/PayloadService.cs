@@ -60,48 +60,65 @@ namespace Mabean.Services
 
         public async Task<bool> AddPayload(string payload, string payloadName)
         {
+            Console.WriteLine("Adding payload: " + payloadName);
             ProcessStartInfo psi = new ProcessStartInfo
             {
                 FileName = "cmd.exe",
-                Arguments = payload,
+                Arguments = "/c " + payload,
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
                 UseShellExecute = false,
                 CreateNoWindow = true
             };
 
+            Console.WriteLine("Executing command: " + payload);
 
-            using (Process process = Process.Start(psi))
+            try
             {
-                using (MemoryStream ms = new MemoryStream())
+                using (Process process = Process.Start(psi))
                 {
-                    try
+                    using (MemoryStream ms = new MemoryStream())
                     {
-                        process.StandardOutput.BaseStream.CopyTo(ms);
-                        process.WaitForExit();
-                        
-                        var encryptedPayload = await EncryptionService.XorEncrypt(ms.ToArray());
-                        string encoded = Convert.ToBase64String(encryptedPayload);
+                        try
+                        {
+                            var stderrTask = process.StandardError.ReadToEndAsync();
+                            await process.StandardOutput.BaseStream.CopyToAsync(ms);
+                            await stderrTask;
+                            await process.WaitForExitAsync();
 
-                        var json = File.ReadAllText(Paths.ConfigJsonPath);
-                        await FetchJsonAsync();
+                            var encryptedPayload = await EncryptionService.XorEncrypt(ms.ToArray());
+                            string encoded = Convert.ToBase64String(encryptedPayload);
 
-                        _config.Payloads.Add(payloadName);
+                            Console.WriteLine(encoded);
 
-                        var node = JsonSerializer.SerializeToNode(_config, new JsonSerializerOptions { WriteIndented = true });
+                            var json = File.ReadAllText(Paths.ConfigJsonPath);
+                            await FetchJsonAsync();
 
-                        await File.WriteAllTextAsync(Paths.ConfigJsonPath, node.ToString());
+                            _config.Payloads.Add(payloadName);
 
-                        File.WriteAllText(Path.Combine(Paths.PayloadsDir, payloadName), encoded);
+                            var node = JsonSerializer.SerializeToNode(_config, new JsonSerializerOptions { WriteIndented = true });
 
-                        return true;
-                    }
-                    catch (Exception ex)
-                    {
-                        return false;
+                            await File.WriteAllTextAsync(Paths.ConfigJsonPath, node.ToString());
+
+                            File.WriteAllText(Path.Combine(Paths.PayloadsDir, payloadName), encoded);
+
+                            return true;
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine(ex.ToString());
+                            return false;
+                        }
                     }
                 }
             }
+            catch (Exception ex) 
+            { 
+                Console.WriteLine($"Error: {ex.Message}");
+                return false;
+            }
+
+            
         }
     }
 }

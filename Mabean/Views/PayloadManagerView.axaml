@@ -1,55 +1,58 @@
 <UserControl xmlns="https://github.com/avaloniaui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:shadui="clr-namespace:ShadUI;assembly=ShadUI"
-             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-             x:Class="Mabean.Views.PayloadManagerView"
-             xmlns:vm="using:Mabean.ViewModels"
-             x:DataType="vm:PayloadManagerViewModel">
+			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+			 xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+			 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+			 xmlns:shadui="clr-namespace:ShadUI;assembly=ShadUI"
+			 mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+			 x:Class="Mabean.Views.PayloadManagerView"
+			 xmlns:vm="using:Mabean.ViewModels"
+			 x:DataType="vm:PayloadManagerViewModel">
 
-    <Border Padding="20">
-        <StackPanel HorizontalAlignment="Left" VerticalAlignment="Top">
-            <TextBlock
-                Classes="h4"
-                Text="Create payload"
-                TextWrapping="Wrap" />
-            <Border Height="12"/>
-            <TextBox
-                shadui:ControlAssist.Label="Enter command to generate payload"
-                Width="400"
-                shadui:ControlAssist.Height="100"
-                AcceptsReturn="True"
-                Watermark="E.g msfvenom -p windows/x64/exec CMD=calc.exe..." />
-            <Border Height="12"/>
-            <TextBox 
-            shadui:ControlAssist.Label="Payload name"
-            HorizontalAlignment="Left"
-                Width="225" 
-                Watermark="Name for the payload" />
-            <Border Height="12"/>
-                <Button
-                Width="120"
-                HorizontalAlignment="Left"
-                Classes="Primary"
-                Content="Create" />
-            <Border Height="12"/>
-            <Separator Height="1" Background="{DynamicResource BorderBrush}" Margin="0,8" />
-            <Border Height="12"/>
-            <TextBlock
-                Classes="h4"
-                Text="Created payloads:"
-                TextWrapping="Wrap" />
-             <TextBlock
-              Text="There are no payloads"
-              IsVisible="{Binding HasNoPayloads}"
-              Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
-                <Border Height="12"/>
-              <ListBox 
-                IsVisible="{Binding !HasNoPayloads}"
-                ItemsSource="{Binding Payloads}" /> 
-        </StackPanel>
+	<Border Padding="20">
+		<StackPanel HorizontalAlignment="Left" VerticalAlignment="Top">
+			<TextBlock
+			Classes="h4"
+			Text="Create payload"
+			TextWrapping="Wrap" />
+			<Border Height="12"/>
+			<TextBox
+			shadui:ControlAssist.Label="Enter command to generate payload"
+			Width="400"
+			Text="{Binding PayloadCommand}"
+			shadui:ControlAssist.Height="100"
+			AcceptsReturn="True"
+			Watermark="E.g msfvenom -p windows/x64/exec CMD=calc.exe..." />
+			<Border Height="12"/>
+			<TextBox
+			shadui:ControlAssist.Label="Payload name"
+			HorizontalAlignment="Left"
+			Text="{Binding PayloadName}"
+			Width="225"
+			Watermark="Name for the payload" />
+			<Border Height="12"/>
+			<Button
+			Width="120"
+			HorizontalAlignment="Left"
+			Classes="Primary"
+			Command="{Binding AddPayloadCommand}"
+			Content="Create" />
+			<Border Height="12"/>
+			<Separator Height="1" Background="{DynamicResource BorderBrush}" Margin="0,8" />
+			<Border Height="12"/>
+			<TextBlock
+			Classes="h4"
+			Text="Created payloads:"
+			TextWrapping="Wrap" />
+			<TextBlock
+			Text="There are no payloads"
+			IsVisible="{Binding HasNoPayloads}"
+			Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+			<Border Height="12"/>
+			<ListBox
+			IsVisible="{Binding !HasNoPayloads}"
+			ItemsSource="{Binding Payloads}" />
+	</StackPanel>
 
-    </Border>
+	</Border>
 
 </UserControl>

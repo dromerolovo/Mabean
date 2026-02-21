@@ -14,12 +14,9 @@ namespace Mabean.ViewModels
 
         private readonly PayloadService _payloadService;
         private readonly SimulateBehaviorService _simulateBehaviorService;
-        
+
         [ObservableProperty]
-        private ObservableCollection<string> _payloads = new ObservableCollection<string>()
-        {
-            "Calc"
-        };
+        private ObservableCollection<string> _payloads = new ObservableCollection<string>();
 
         [ObservableProperty]
         private ObservableCollection<string> _behaviors = new ObservableCollection<string>()
