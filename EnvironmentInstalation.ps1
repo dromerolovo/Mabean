@@ -65,14 +65,15 @@ Set-MpPreference -EnableNetworkProtection AuditMode
 Set-MpPreference -MAPSReporting Advanced
 Set-MpPreference -SubmitSamplesConsent SendSafeSamples
 
-Write-Host "Set MpPreference done" - ForegroundColor Green
+Write-Host "Set MpPreference done" -ForegroundColor Green
 
 #--------------------------------------Dotnet installation---------------------------------------------------#
 $IsDotnetInstalled = [bool](Get-Command dotnet -ErrorAction SilentlyContinue)
 if(!$IsDotnetInstalled) {
     $installScript = "$env:TEMP\dotnet-install.ps1"
+    $dotnetDir = "$env:ProgramFiles\dotnet"
     Invoke-WebRequest -Uri "https://dot.net/v1/dotnet-install.ps1" -OutFile $installScript -UseBasicParsing
-    & $installScript -Channel "10.0" -InstallDir "$env:ProgramFiles\dotnet"
+    & $installScript -Channel "10.0" -InstallDir $dotnetDir
 
     $machinePath=[Environment]::GetEnvironmentVariable("Path","Machine")
     if(-not ($machinePath -split ";" | Where-Object { $_.TrimEnd("\") -ieq $dotnetDir.TrimEnd("\") }))

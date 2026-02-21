@@ -11,8 +11,8 @@
              VerticalAlignment="Stretch"
              HorizontalAlignment="Stretch">
 
-    <Border Padding="20">
-        <Grid RowDefinitions="Auto Auto Auto * Auto">
+    <Border Padding="20" MaxHeight="{Binding $parent[Window].ClientSize.Height}">
+        <Grid RowDefinitions="Auto Auto Auto * Auto" >
 
             <TextBlock Grid.Row="0"
                        Classes="h4"
@@ -34,7 +34,6 @@
                       ItemsSource="{Binding Processes}"
                       IsReadOnly="True"
                       SelectionMode="Single"
-                      RowHeight="44"
                       HeadersVisibility="Column"
                       VerticalScrollBarVisibility="Visible"
                       HorizontalScrollBarVisibility="Auto">

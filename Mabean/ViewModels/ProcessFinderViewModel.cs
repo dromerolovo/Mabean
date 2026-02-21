@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Mabean.Helpers;
 using Mabean.Models;
 using Mabean.Services;
 using System;
@@ -15,7 +16,7 @@ namespace Mabean.ViewModels
         private readonly ProcessFinderService _processFinderService;
 
         [ObservableProperty]
-        private ObservableCollection<ProcessInfo> _processes = new();
+        private SmartObservableCollection<ProcessInfo> _processes = new();
 
         [ObservableProperty]
         private bool _isLoading;
@@ -30,7 +31,10 @@ namespace Mabean.ViewModels
         {
             IsLoading = true;
             var processes = await Task.Run(() => _processFinderService.GetProcesses());
-            Processes = new ObservableCollection<ProcessInfo>(processes);
+            Processes.Clear();
+            foreach (var p in processes)
+                Processes.Add(p);
+            Processes.ResumeNotifications();
             IsLoading = false;
         }
 
