@@ -1,4 +1,9 @@
-﻿$IsAdmin = ([Security.Principal.WindowsPrincipal] `
+﻿
+params() {
+    [switch]$IncludeMsfVenom
+}
+
+$IsAdmin = ([Security.Principal.WindowsPrincipal] `
     [Security.Principal.WindowsIdentity]::GetCurrent()
 ).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
 
@@ -79,6 +84,7 @@ if(!$IsDotnetInstalled) {
     if(-not ($machinePath -split ";" | Where-Object { $_.TrimEnd("\") -ieq $dotnetDir.TrimEnd("\") }))
     { 
         [Environment]::SetEnvironmentVariable("Path",$machinePath+";"+$dotnetDir,"Machine") 
+        $env:Path += ";$dotnetDir"
     }
 
     Write-Host "Dotnet installed successfully" -ForegroundColor Green
@@ -98,3 +104,34 @@ $installed = (Test-Path $vcRedistKey) -and ((Get-ItemProperty $vcRedistKey -Erro
   } else {
       Write-Host "VC++ Redistributable x64 already installed. Skipping" -ForegroundColor Green
   }
+
+  #-------------------------------------Msfvenom installation---------------------------------------------------
+
+if ($includeMsfVenom) {
+    if(-Not (Get-Command msfvenom -ErrorAction SilentlyContinue)) {
+        $installerUrl = "https://windows.metasploit.com/metasploitframework-latest.msi"
+        $installerPath = "$env:TEMP\metasploit.msi"
+        $metasploitDir = "C:\metasploit-framework\bin"
+
+        $ProgressPreference = 'SilentlyContinue'
+        Invoke-WebRequest -Uri $installerUrl -OutFile $installerPath
+        Start-Process msiexec.exe -ArgumentList "/i `"$installerPath`" /quiet /norestart" -Wait
+        $machinePath = [Environment]::GetEnvironmentVariable("Path", "Machine")
+        if (-not ($machinePath -split ";" | Where-Object { $_.TrimEnd("\") -ieq $metasploitDir.TrimEnd("\") })) {
+            [Environment]::SetEnvironmentVariable("Path", $machinePath + ";" + $metasploitDir, "Machine")
+        }
+        $env:Path += ";$metasploitDir"
+        Add-MpPreference -ExclusionPath "C:\metasploit-framework"
+        Remove-Item $installerPath -Force
+    }
+}
+
+
+
+
+
+
+
+
+
+
