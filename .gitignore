@@ -32,6 +32,8 @@ MabeanScripts/**/[12]/**
 !MabeanScripts/**/x64/
 !MabeanScripts/**/x64/Release/
 !MabeanScripts/**/x64/Release/*.dll
+!MabeanScripts/**/[12]/*.cpp
+!MabeanScripts/**/[12]/*.h
 *.dll.recipe
 x86/
 [Ww][Ii][Nn]32/

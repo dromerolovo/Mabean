@@ -37,6 +37,11 @@ namespace Mabean.Services
                     var code4 = InteropPrivilegeEscalation.TokenTheftEscalation(puid);
                     LoggerService.Write($"[+] Performed token theft escalation into process with PUID: {puid} with return code: {code4}");
                     break;
+                case "PrivilegeEscalation-FodHelperAbuse":
+                    var code5 = InteropPrivilegeEscalation.FodHelperAbuseEscalation();
+                    LoggerService.Write($"[+] Performed FodHelper abuse escalation with return code: {code5}");
+                    break;
+
             }
         }
     }

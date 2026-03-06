@@ -24,7 +24,8 @@ namespace Mabean.ViewModels
             "Injection-Simple",
             "Injection-Apc-MultiThreaded",
             "Injection-Apc-EarlyBird",
-            "PrivilegeEscalation-TokenTheft"
+            "PrivilegeEscalation-TokenTheft",
+            "PrivilegeEscalation-FodHelperAbuse"
         };
 
         [ObservableProperty]
