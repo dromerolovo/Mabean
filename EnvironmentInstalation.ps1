@@ -1,7 +1,7 @@
 ﻿
-params() {
-    [switch]$IncludeMsfVenom
-}
+  param(
+      [switch]$IncludeMsfVenom
+  )
 
 $IsAdmin = ([Security.Principal.WindowsPrincipal] `
     [Security.Principal.WindowsIdentity]::GetCurrent()
@@ -23,7 +23,7 @@ if(!$IsSysmonInstalled) {
 
     Expand-Archive -Path "$env:TEMP\Sysmon.zip" -DestinationPath "$env:ProgramFiles\Sysmon" -Force
 
-    Copy-Item -Path ".\sysmonconfig-export.xml" -Destination "$env:ProgramFiles\Sysmon"
+    Copy-Item -Path "$PSScriptRoot\sysmonconfig-export.xml" -Destination "$env:ProgramFiles\Sysmon"
 
     & "$env:ProgramFiles\Sysmon\Sysmon64.exe" -accepteula -i "$env:ProgramFiles\Sysmon\sysmonconfig-export.xml"
 
