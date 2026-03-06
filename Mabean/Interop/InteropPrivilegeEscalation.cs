@@ -21,5 +21,11 @@ namespace Mabean.Interop
                 public static extern int TokenTheftEscalation(
             nuint pid
         );
+
+        [DllImport("2.dll",
+        CallingConvention = CallingConvention.Cdecl,
+        ExactSpelling = true)]
+            public static extern int FodHelperAbuseEscalation();
+
     }
 }

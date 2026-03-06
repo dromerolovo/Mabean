@@ -15,10 +15,9 @@ namespace Mabean.Services
         public ProcessInfo[] GetProcesses()
         {
             var processes = new List<ProcessInfo>();
+            EventsUtils.SpawnMarkerEvent();
             using PowerShell ps = PowerShell.Create();
             ps.AddScript("Get-Process -IncludeUserName | Select-Object Name, Id, UserName");
-            //TODO: Very unstable, find a better way to avoid getting the powershell related events 
-            EventsUtils.SpawnMarkerEvent();
             var results = ps.Invoke();
             EventsUtils.SpawnMarkerEvent();
             foreach (PSObject result in results)

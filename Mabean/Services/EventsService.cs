@@ -85,7 +85,7 @@ namespace Mabean.Services
 
             var message = record.FormatDescription() ?? string.Empty;
 
-            if(message.Contains(_markerProcessExe, StringComparison.OrdinalIgnoreCase))
+            if(record.Id == 1 && message.Contains(_markerProcessExe, StringComparison.OrdinalIgnoreCase))
             {
                 if(!_markerActivated)
                 {
@@ -95,14 +95,17 @@ namespace Mabean.Services
                 {
                     Console.WriteLine("Marker Deactivated");
                     //TODO: Very unstable, find a better way to avoid getting the powershell related events 
-                    _ = Task.Delay(4000).ContinueWith(_ => _markerActivated = false);
+                    _markerActivated = false;
                 }
                 return;
             }
 
             if (_markerActivated) return;
 
+            if (message.Contains(_markerProcessExe, StringComparison.OrdinalIgnoreCase)) return;
+
             if (record == null) return;
+
 
             Console.WriteLine($"Pwsh event");
             var @event = new SecurityEvent

