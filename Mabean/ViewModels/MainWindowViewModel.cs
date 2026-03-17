@@ -14,12 +14,14 @@ public partial class MainWindowViewModel : ViewModelBase
     public EventsViewModel EventsViewModel { get; }
 
     public ProcessFinderViewModel ProcessFinderViewModel { get; }
+    public BehaviorVisualizationViewModel BehaviorVisualizationViewModel { get; }
 
-    public MainWindowViewModel(KeysManagmentViewModel keysManagmentViewModel, 
-        PayloadManagerViewModel payloadManagerViewModel, 
+    public MainWindowViewModel(KeysManagmentViewModel keysManagmentViewModel,
+        PayloadManagerViewModel payloadManagerViewModel,
         BehaviorSimulationViewModel behaviorSimulationViewModel,
         EventsViewModel eventsViewModel,
-        ProcessFinderViewModel processFinderViewModel)
+        ProcessFinderViewModel processFinderViewModel,
+        BehaviorVisualizationViewModel behaviorVisualizationViewModel)
     {
         KeysManagmentViewModel = keysManagmentViewModel;
         PayloadManagerViewModel = payloadManagerViewModel;
@@ -27,6 +29,7 @@ public partial class MainWindowViewModel : ViewModelBase
         _currentPage = HomeViewModel;
         EventsViewModel = eventsViewModel;
         ProcessFinderViewModel = processFinderViewModel;
+        BehaviorVisualizationViewModel = behaviorVisualizationViewModel;
     }
     public string Greeting { get; } = "Welcome to Avalonia!";
 
@@ -48,6 +51,7 @@ public partial class MainWindowViewModel : ViewModelBase
             "BehaviorSimulation" => BehaviorSimulationViewModel,
             "EventsView" => EventsViewModel,
             "ProcessFinderView" => ProcessFinderViewModel,
+            "BehaviorVisualization" => BehaviorVisualizationViewModel,
             _ => CurrentPage
         };
     }

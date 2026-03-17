@@ -1,0 +1,61 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:Mabean.ViewModels"
+             mc:Ignorable="d"
+             d:DesignWidth="800"
+             d:DesignHeight="450"
+             x:Class="Mabean.Views.BehaviorVisualizationView"
+             x:DataType="vm:BehaviorVisualizationViewModel"
+             VerticalAlignment="Stretch"
+             HorizontalAlignment="Stretch">
+
+   <Border Padding="20">
+     <Grid RowDefinitions="Auto,*" RowSpacing="16">
+       <StackPanel Grid.Row="0" HorizontalAlignment="Left">
+         <TextBlock Classes="h4" Text="Behavior Analyzer" />
+         <Border Height="8" />
+           <Border Height="12"/>
+         <ComboBox Width="255"
+                   ItemsSource="{Binding Behaviors}"
+                   SelectedItem="{Binding SelectedBehavior}" />
+           <Border Height="12"/>
+       </StackPanel>
+
+       <Border Grid.Row="1">
+         <Border.Background>
+           <DrawingBrush TileMode="Tile"
+                         DestinationRect="0,0,80,46"
+                         Stretch="None">
+             <DrawingBrush.Drawing>
+               <DrawingGroup>
+                 <GeometryDrawing>
+                   <GeometryDrawing.Pen>
+                     <Pen Brush="#2B364A" Thickness="1" />
+                   </GeometryDrawing.Pen>
+                   <GeometryDrawing.Geometry>
+                     <GeometryGroup>
+                       <LineGeometry StartPoint="40,0" EndPoint="80,23" />
+                       <LineGeometry StartPoint="0,23" EndPoint="40,0" />
+                       <LineGeometry StartPoint="0,23" EndPoint="40,46" />
+                       <LineGeometry StartPoint="40,46" EndPoint="80,23" />
+                     </GeometryGroup>
+                   </GeometryDrawing.Geometry>
+                 </GeometryDrawing>
+               </DrawingGroup>
+             </DrawingBrush.Drawing>
+           </DrawingBrush>
+         </Border.Background>
+
+         <Canvas>
+           <Border Background="#1F2636" CornerRadius="8" Padding="12"
+                   Canvas.Left="420" Canvas.Top="80">
+             <TextBlock Text="Start" Foreground="#C6F36E" FontWeight="Bold" />
+           </Border>
+         </Canvas>
+       </Border>
+     </Grid>
+   </Border>
+
+</UserControl>
