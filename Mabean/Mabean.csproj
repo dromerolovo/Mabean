@@ -13,6 +13,9 @@
     <AvaloniaResource Include="Assets\**" />
     <None Remove="nul" />
     <Folder Include="Controls\" />
+    <Content Include="Library\library.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
   <ItemGroup>

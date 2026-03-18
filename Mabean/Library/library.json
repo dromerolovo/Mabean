@@ -1,0 +1,172 @@
+{
+  "Behavior-Description": {
+    "Simple-Injection": {
+      "Steps": [
+        {
+          "Name": "Open Process",
+          "Description": "Obtains a handle to the target process. Required before any cross-process memory or thread operations can be performed.",
+          "Signature": {
+            "FunctionName": "OpenProcess",
+            "Parameters": [
+              {
+                "Name": "dwDesiredAccess",
+                "Description": "Requested access rights for the target process handle, determining what operations the caller can perform — such as reading/writing process memory, creating threads, or terminating the process.",
+                "Value": "PROCESS_ALL_ACCESS"
+              },
+              {
+                "Name": "bInheritHandle",
+                "Description": "Whether child processes spawned by the caller can inherit this handle. Set to FALSE — no handle inheritance is needed for injection.",
+                "Value": "FALSE"
+              },
+              {
+                "Name": "dwProcessId",
+                "Description": "The PID of the target process to open. Supplied externally by the caller as the injection target.",
+                "Value": "pid"
+              }
+            ]
+          }
+        },
+        {
+          "Name": "Virtual Alloc Ex",
+          "Description": "Allocates a region of memory inside the target process's address space where the payload will be written and later executed.",
+          "Signature": {
+            "FunctionName": "VirtualAllocEx",
+            "Parameters": [
+              {
+                "Name": "hProcess",
+                "Description": "Handle to the target process obtained from OpenProcess. Determines where the allocation occurs.",
+                "Value": "hProcess"
+              },
+              {
+                "Name": "lpAddress",
+                "Description": "Desired starting address for the allocation. NULL lets the OS choose a suitable address.",
+                "Value": "NULL"
+              },
+              {
+                "Name": "dwSize",
+                "Description": "Size in bytes of the region to allocate. Matches the payload length to fit it exactly.",
+                "Value": "length"
+              },
+              {
+                "Name": "flAllocationType",
+                "Description": "MEM_RESERVE reserves the address range; MEM_COMMIT backs it with physical memory. Both flags together make the region immediately usable.",
+                "Value": "MEM_RESERVE | MEM_COMMIT"
+              },
+              {
+                "Name": "flProtect",
+                "Description": "Memory protection for the allocated region. PAGE_EXECUTE_READWRITE allows the payload to be written and then executed directly — a strong indicator of code injection.",
+                "Value": "PAGE_EXECUTE_READWRITE"
+              }
+            ]
+          }
+        },
+        {
+          "Name": "Write Process Memory",
+          "Description": "Copies the shellcode payload from the caller's address space into the allocated region inside the target process.",
+          "Signature": {
+            "FunctionName": "WriteProcessMemory",
+            "Parameters": [
+              {
+                "Name": "hProcess",
+                "Description": "Handle to the target process. Determines which process's memory is written to.",
+                "Value": "hProcess"
+              },
+              {
+                "Name": "lpBaseAddress",
+                "Description": "Destination address inside the target process — the buffer returned by VirtualAllocEx.",
+                "Value": "remoteBuffer"
+              },
+              {
+                "Name": "lpBuffer",
+                "Description": "Pointer to the source payload in the caller's memory that will be copied into the target.",
+                "Value": "payload"
+              },
+              {
+                "Name": "nSize",
+                "Description": "Number of bytes to write. Matches the full payload length.",
+                "Value": "length"
+              },
+              {
+                "Name": "lpNumberOfBytesWritten",
+                "Description": "Optional output for how many bytes were actually written. NULL means the caller is not checking this.",
+                "Value": "NULL"
+              }
+            ]
+          }
+        },
+        {
+          "Name": "Create Remote Thread",
+          "Description": "Spawns a new thread inside the target process with its entry point set to the injected payload, triggering execution of the shellcode.",
+          "Signature": {
+            "FunctionName": "CreateRemoteThread",
+            "Parameters": [
+              {
+                "Name": "hProcess",
+                "Description": "Handle to the target process where the new thread will be created.",
+                "Value": "hProcess"
+              },
+              {
+                "Name": "lpThreadAttributes",
+                "Description": "Security attributes for the thread handle. NULL uses default security — no special inheritance or descriptor.",
+                "Value": "NULL"
+              },
+              {
+                "Name": "dwStackSize",
+                "Description": "Initial stack size for the new thread. 0 uses the executable's default stack size.",
+                "Value": "0"
+              },
+              {
+                "Name": "lpStartAddress",
+                "Description": "Entry point of the new thread — cast to the allocated remote buffer, so the thread begins executing the injected payload.",
+                "Value": "(LPTHREAD_START_ROUTINE)remoteBuffer"
+              },
+              {
+                "Name": "lpParameter",
+                "Description": "Argument passed to the thread function. NULL — no parameter is needed for this payload.",
+                "Value": "NULL"
+              },
+              {
+                "Name": "dwCreationFlags",
+                "Description": "Thread creation flags. 0 means the thread starts running immediately after creation.",
+                "Value": "0"
+              },
+              {
+                "Name": "lpThreadId",
+                "Description": "Optional output for the new thread's ID. NULL — the caller does not need to track the thread ID.",
+                "Value": "NULL"
+              }
+            ]
+          }
+        },
+        {
+          "Name": "Close Thread Handle",
+          "Description": "Releases the thread handle. The injected thread continues running — this only closes the caller's reference to it.",
+          "Signature": {
+            "FunctionName": "CloseHandle",
+            "Parameters": [
+              {
+                "Name": "hObject",
+                "Description": "The remote thread handle returned by CreateRemoteThread.",
+                "Value": "hThread"
+              }
+            ]
+          }
+        },
+        {
+          "Name": "Close Process Handle",
+          "Description": "Releases the process handle, completing cleanup. The injected thread remains running inside the target process.",
+          "Signature": {
+            "FunctionName": "CloseHandle",
+            "Parameters": [
+              {
+                "Name": "hObject",
+                "Description": "The target process handle obtained from OpenProcess.",
+                "Value": "hProcess"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  }
+}
