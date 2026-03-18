@@ -53,7 +53,7 @@
            <Grid Width="{Binding CanvasWidth}" Height="{Binding CanvasHeight}">
 
              <!-- Connector lines (behind nodes) -->
-<!--             <ItemsControl ItemsSource="{Binding Connectors}">
+             <ItemsControl ItemsSource="{Binding Connectors}">
                <ItemsControl.ItemsPanel>
                  <ItemsPanelTemplate>
                    <Canvas />
@@ -63,11 +63,10 @@
                  <DataTemplate x:DataType="vm:ConnectorDisplay">
                    <Line StartPoint="{Binding StartPoint}"
                          EndPoint="{Binding EndPoint}"
-                         Stroke="#C6F36E" StrokeThickness="2"
-                         StrokeDashArray="6,3" />
+                         Stroke="#C6F36E" StrokeThickness="2" />
                  </DataTemplate>
                </ItemsControl.ItemTemplate>
-             </ItemsControl>-->
+             </ItemsControl>
 
              <!-- Nodes (in front) -->
              <ItemsControl ItemsSource="{Binding Nodes}">
@@ -80,44 +79,31 @@
                  <ControlTheme TargetType="ContentPresenter" x:DataType="vm:VisualizationNodeDisplay">
                    <Setter Property="Canvas.Left" Value="{Binding X}" />
                    <Setter Property="Canvas.Top" Value="{Binding Y}" />
+                   <Setter Property="ZIndex"      Value="{Binding ZIndex}" />
                  </ControlTheme>
                </ItemsControl.ItemContainerTheme>
                <ItemsControl.ItemTemplate>
                  <DataTemplate x:DataType="vm:VisualizationNodeDisplay">
-                   <Grid>
-                     <Grid.RowDefinitions>
-                       <RowDefinition Height="Auto" />
-                       <RowDefinition Height="Auto" />
-                     </Grid.RowDefinitions>
-
-                     <Border Background="#1F2636" CornerRadius="8" Padding="12" Width="260">
-                       <StackPanel Spacing="6">
-                         <TextBlock Text="{Binding Name}" Foreground="#C6F36E" FontWeight="Bold" />
-                         <TextBlock Text="{Binding FunctionName}" Foreground="#9FB0D8" />
-                         <TextBlock Text="{Binding Description}" Foreground="#9FB0D8" TextWrapping="Wrap" />
-                         <Expander Header="Parameters">
-                           <ItemsControl ItemsSource="{Binding Parameters}">
-                             <ItemsControl.ItemTemplate>
-                               <DataTemplate x:DataType="vm:VisualizationNodeParameterDisplay">
-                                 <StackPanel Spacing="2" Margin="0,6,0,0">
-                                   <TextBlock Text="{Binding Name}" FontWeight="SemiBold" />
-                                   <TextBlock Text="{Binding Value}" Foreground="#C6F36E" />
-                                   <TextBlock Text="{Binding Description}" Foreground="#9FB0D8" TextWrapping="Wrap" />
-                                 </StackPanel>
-                               </DataTemplate>
-                             </ItemsControl.ItemTemplate>
-                           </ItemsControl>
-                         </Expander>
-                       </StackPanel>
-                     </Border>
-
-                     <Image Grid.Row="1"
-                            Margin="0,24,0,0"
-                            Source="avares://Mabean/Assets/Node.png"
-                            Width="200"
-                            Height="200"
-                            HorizontalAlignment="Center" />
-                   </Grid>
+                   <Border Background="#1F2636" CornerRadius="8" Padding="12" Width="260">
+                     <StackPanel Spacing="6">
+                       <TextBlock Text="{Binding Name}" Foreground="#C6F36E" FontWeight="Bold" />
+                       <TextBlock Text="{Binding FunctionName}" Foreground="#9FB0D8" />
+                       <TextBlock Text="{Binding Description}" Foreground="#9FB0D8" TextWrapping="Wrap" />
+                       <Expander Header="Parameters" IsExpanded="{Binding IsExpanded, Mode=TwoWay}">
+                         <ItemsControl ItemsSource="{Binding Parameters}">
+                           <ItemsControl.ItemTemplate>
+                             <DataTemplate x:DataType="vm:VisualizationNodeParameterDisplay">
+                               <StackPanel Spacing="2" Margin="0,6,0,0">
+                                 <TextBlock Text="{Binding Name}" FontWeight="SemiBold" />
+                                 <TextBlock Text="{Binding Value}" Foreground="#C6F36E" />
+                                 <TextBlock Text="{Binding Description}" Foreground="#9FB0D8" TextWrapping="Wrap" />
+                               </StackPanel>
+                             </DataTemplate>
+                           </ItemsControl.ItemTemplate>
+                         </ItemsControl>
+                       </Expander>
+                     </StackPanel>
+                   </Border>
                  </DataTemplate>
                </ItemsControl.ItemTemplate>
              </ItemsControl>

@@ -65,23 +65,26 @@ public partial class BehaviorVisualizationViewModel : ViewModelBase
             return;
         }
 
-        const double startX = 60;
-        const double startY = 40;
-        const double offsetX = 320;
-        const double offsetY = 240;
-        const double staggerY = 80;
-        const double cardCenterX = 130;
-        const double cardBottom = 160;
+        const double startX        = 60;
+        const double startY        = 40;
+        const double offsetX       = 320;
+        const double offsetY       = 240;
+        const int    columns       = 3;
+        const double cardWidth     = 260;
+        const double cardHalfH     = 80;
+        const double cardHeight    = 160;
 
         var positions = new List<(double X, double Y)>();
 
         var index = 0;
         for (var current = root; current != null; current = current.Next)
         {
-            var column = index % 2;
-            var row = index / 2;
-            var x = startX + offsetX * column;
-            var y = startY + offsetY * row + (column == 1 ? staggerY : 0);
+            var col = index % columns;
+            var row = index / columns;
+
+            var visualCol = row % 2 == 0 ? col : (columns - 1 - col);
+            var x = startX + offsetX * visualCol;
+            var y = startY + offsetY * row;
 
             positions.Add((x, y));
             Nodes.Add(new VisualizationNodeDisplay(current, x, y));
@@ -90,15 +93,36 @@ public partial class BehaviorVisualizationViewModel : ViewModelBase
 
         for (int i = 0; i < positions.Count - 1; i++)
         {
-            Connectors.Add(new ConnectorDisplay
+            var (x1, y1) = positions[i];
+            var (x2, y2) = positions[i + 1];
+
+            Avalonia.Point start, end;
+
+            if (Math.Abs(y1 - y2) < 1.0)
             {
-                StartPoint = new Avalonia.Point(positions[i].X + cardCenterX,     positions[i].Y + cardBottom),
-                EndPoint   = new Avalonia.Point(positions[i + 1].X + cardCenterX, positions[i + 1].Y)
-            });
+                if (x2 > x1) 
+                {
+                    start = new Avalonia.Point(x1 + cardWidth, y1 + cardHalfH);
+                    end   = new Avalonia.Point(x2,             y2 + cardHalfH);
+                }
+                else 
+                {
+                    start = new Avalonia.Point(x1,             y1 + cardHalfH);
+                    end   = new Avalonia.Point(x2 + cardWidth, y2 + cardHalfH);
+                }
+            }
+            else
+            {
+                var cx = x1 + cardWidth / 2.0;
+                start = new Avalonia.Point(cx, y1 + cardHeight);
+                end   = new Avalonia.Point(cx, y2);
+            }
+
+            Connectors.Add(new ConnectorDisplay { StartPoint = start, EndPoint = end });
         }
 
         CanvasWidth  = positions.Max(p => p.X) + 260 + 60;
-        CanvasHeight = positions.Max(p => p.Y) + 400;
+        CanvasHeight = positions.Max(p => p.Y) + 800;
     }
 
     [ObservableProperty] private double _canvasWidth  = 800;
@@ -112,7 +136,7 @@ public partial class BehaviorVisualizationViewModel : ViewModelBase
     }
 }
 
-public sealed class VisualizationNodeDisplay
+public sealed partial class VisualizationNodeDisplay : ObservableObject
 {
     public VisualizationNodeDisplay(VisualizationNode node, double x, double y)
     {
@@ -132,6 +156,12 @@ public sealed class VisualizationNodeDisplay
     public string Description { get; }
     public string FunctionName { get; }
     public IReadOnlyList<VisualizationNodeParameterDisplay> Parameters { get; }
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ZIndex))]
+    private bool _isExpanded;
+
+    public int ZIndex => _isExpanded ? 100 : 0;
 }
 
 public sealed class ConnectorDisplay

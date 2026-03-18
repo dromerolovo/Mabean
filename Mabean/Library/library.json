@@ -27,7 +27,7 @@
           }
         },
         {
-          "Name": "Virtual Alloc Ex",
+          "Name": "Virtual Allocation",
           "Description": "Allocates a region of memory inside the target process's address space where the payload will be written and later executed.",
           "Signature": {
             "FunctionName": "VirtualAllocEx",
