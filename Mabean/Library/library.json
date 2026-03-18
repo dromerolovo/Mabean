@@ -167,6 +167,387 @@
           }
         }
       ]
+    },
+    "Apc-EarlyBird": {
+      "Steps": [
+        {
+          "Name": "Create Suspended Process",
+          "Description": "Spawns the target executable in a suspended state before its entry point runs. This gives the attacker a window to inject code before any user-mode code in the target has executed.",
+          "Signature": {
+            "FunctionName": "CreateProcessA",
+            "Parameters": [
+              {
+                "Name": "lpApplicationName",
+                "Description": "Path to the target executable to spawn. The attacker controls which process becomes the injection host.",
+                "Value": "targetExe"
+              },
+              {
+                "Name": "dwCreationFlags",
+                "Description": "CREATE_SUSPENDED halts the new process at its entry point before any user-mode code runs — the critical flag that enables Early Bird injection.",
+                "Value": "CREATE_SUSPENDED"
+              },
+              {
+                "Name": "lpProcessInformation",
+                "Description": "Receives the handles to the new process (hProcess) and its main thread (hThread), both needed for subsequent injection steps.",
+                "Value": "&pi"
+              }
+            ]
+          }
+        },
+        {
+          "Name": "Virtual Allocation",
+          "Description": "Allocates a RWX memory region inside the suspended process where the payload will be written.",
+          "Signature": {
+            "FunctionName": "VirtualAllocEx",
+            "Parameters": [
+              {
+                "Name": "hProcess",
+                "Description": "Handle to the suspended target process obtained from CreateProcessA.",
+                "Value": "pi.hProcess"
+              },
+              {
+                "Name": "flAllocationType",
+                "Description": "MEM_COMMIT | MEM_RESERVE makes the region immediately usable without a separate reservation step.",
+                "Value": "MEM_COMMIT | MEM_RESERVE"
+              },
+              {
+                "Name": "flProtect",
+                "Description": "PAGE_EXECUTE_READWRITE allows the region to be written now and executed later when the APC fires — a strong behavioral indicator.",
+                "Value": "PAGE_EXECUTE_READWRITE"
+              }
+            ]
+          }
+        },
+        {
+          "Name": "Write Process Memory",
+          "Description": "Copies the shellcode into the allocated region of the suspended process.",
+          "Signature": {
+            "FunctionName": "WriteProcessMemory",
+            "Parameters": [
+              {
+                "Name": "hProcess",
+                "Description": "Handle to the suspended target process.",
+                "Value": "pi.hProcess"
+              },
+              {
+                "Name": "lpBaseAddress",
+                "Description": "Destination address in the target — the region returned by VirtualAllocEx.",
+                "Value": "blockMem"
+              },
+              {
+                "Name": "lpNumberOfBytesWritten",
+                "Description": "Output checked against the payload length. A mismatch triggers cleanup and abort — unlike Simple Injection which ignores this.",
+                "Value": "&bytesWritten"
+              }
+            ]
+          }
+        },
+        {
+          "Name": "Queue User APC",
+          "Description": "Queues an Asynchronous Procedure Call to the suspended main thread pointing at the injected payload. When the thread is resumed it enters an alertable state and drains the APC queue, executing the shellcode before the process's own entry point.",
+          "Signature": {
+            "FunctionName": "QueueUserAPC",
+            "Parameters": [
+              {
+                "Name": "pfnAPC",
+                "Description": "The APC callback — cast to PAPCFUNC and pointed at blockMem, so the shellcode is what executes when the APC fires.",
+                "Value": "(PAPCFUNC)blockMem"
+              },
+              {
+                "Name": "hThread",
+                "Description": "The main thread of the suspended process. Queuing the APC here guarantees it runs before any application code.",
+                "Value": "pi.hThread"
+              },
+              {
+                "Name": "dwData",
+                "Description": "Optional parameter passed to the APC function. 0 — the shellcode does not expect an argument.",
+                "Value": "0"
+              }
+            ]
+          }
+        },
+        {
+          "Name": "Resume Thread",
+          "Description": "Lifts the suspension on the main thread. As the thread initializes it enters an alertable wait, draining the APC queue and executing the shellcode before the process's own entry point code ever runs.",
+          "Signature": {
+            "FunctionName": "ResumeThread",
+            "Parameters": [
+              {
+                "Name": "hThread",
+                "Description": "The suspended main thread of the target process. Resuming it triggers APC execution.",
+                "Value": "pi.hThread"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "PrivilegeEscalation-TokenTheft": {
+      "Steps": [
+        {
+          "Name": "Lookup Privilege Value",
+          "Description": "Resolves the locally unique identifier (LUID) for SeDebugPrivilege. This LUID is required before the privilege can be enabled on the current process token.",
+          "Signature": {
+            "FunctionName": "LookupPrivilegeValue",
+            "Parameters": [
+              {
+                "Name": "lpSystemName",
+                "Description": "NULL means the lookup is performed on the local system.",
+                "Value": "NULL"
+              },
+              {
+                "Name": "lpName",
+                "Description": "SE_DEBUG_NAME — the privilege that allows opening handles to processes owned by other users, including SYSTEM.",
+                "Value": "SE_DEBUG_NAME"
+              },
+              {
+                "Name": "lpLuid",
+                "Description": "Output — receives the LUID that identifies SeDebugPrivilege on this system.",
+                "Value": "&luid"
+              }
+            ]
+          }
+        },
+        {
+          "Name": "Open Current Process Token",
+          "Description": "Opens the access token of the current process so that SeDebugPrivilege can be enabled on it.",
+          "Signature": {
+            "FunctionName": "OpenProcessToken",
+            "Parameters": [
+              {
+                "Name": "ProcessHandle",
+                "Description": "GetCurrentProcess() — a pseudo-handle to the calling process.",
+                "Value": "GetCurrentProcess()"
+              },
+              {
+                "Name": "DesiredAccess",
+                "Description": "TOKEN_ADJUST_PRIVILEGES — the minimum access right needed to enable or disable privileges on the token.",
+                "Value": "TOKEN_ADJUST_PRIVILEGES"
+              },
+              {
+                "Name": "TokenHandle",
+                "Description": "Output — receives the handle to the current process token.",
+                "Value": "&token"
+              }
+            ]
+          }
+        },
+        {
+          "Name": "Adjust Token Privileges",
+          "Description": "Enables SeDebugPrivilege on the current process token. Without this, OpenProcess on a privileged target process would fail.",
+          "Signature": {
+            "FunctionName": "AdjustTokenPrivileges",
+            "Parameters": [
+              {
+                "Name": "TokenHandle",
+                "Description": "The current process token opened in the previous step.",
+                "Value": "token"
+              },
+              {
+                "Name": "DisableAllPrivileges",
+                "Description": "FALSE — only modify the specific privileges listed in NewState, not disable all.",
+                "Value": "FALSE"
+              },
+              {
+                "Name": "NewState",
+                "Description": "TOKEN_PRIVILEGES struct with SE_PRIVILEGE_ENABLED set on the SeDebugPrivilege LUID.",
+                "Value": "&tp"
+              }
+            ]
+          }
+        },
+        {
+          "Name": "Open Target Process",
+          "Description": "Opens a handle to the target process using PROCESS_QUERY_LIMITED_INFORMATION — the minimum right needed to read its token. SeDebugPrivilege makes this succeed even on privileged processes.",
+          "Signature": {
+            "FunctionName": "OpenProcess",
+            "Parameters": [
+              {
+                "Name": "dwDesiredAccess",
+                "Description": "PROCESS_QUERY_LIMITED_INFORMATION — only needs to query the process token, not full access.",
+                "Value": "PROCESS_QUERY_LIMITED_INFORMATION"
+              },
+              {
+                "Name": "dwProcessId",
+                "Description": "PID of the privileged target process whose token will be stolen.",
+                "Value": "pid"
+              }
+            ]
+          }
+        },
+        {
+          "Name": "Open Target Process Token",
+          "Description": "Retrieves the access token of the target privileged process. This token will be duplicated and used to spawn a new process under that identity.",
+          "Signature": {
+            "FunctionName": "OpenProcessToken",
+            "Parameters": [
+              {
+                "Name": "ProcessHandle",
+                "Description": "Handle to the target process obtained from OpenProcess.",
+                "Value": "ph"
+              },
+              {
+                "Name": "DesiredAccess",
+                "Description": "MAXIMUM_ALLOWED — requests the broadest access the caller is permitted, ensuring the token can later be duplicated.",
+                "Value": "MAXIMUM_ALLOWED"
+              },
+              {
+                "Name": "TokenHandle",
+                "Description": "Output — receives the handle to the target process token.",
+                "Value": "&cToken"
+              }
+            ]
+          }
+        },
+        {
+          "Name": "Duplicate Token",
+          "Description": "Creates a copy of the target's token as a primary token. A primary token is required for CreateProcessWithTokenW — impersonation tokens alone cannot be used to spawn a process.",
+          "Signature": {
+            "FunctionName": "DuplicateTokenEx",
+            "Parameters": [
+              {
+                "Name": "hExistingToken",
+                "Description": "The token obtained from the target process.",
+                "Value": "cToken"
+              },
+              {
+                "Name": "ImpersonationLevel",
+                "Description": "SecurityImpersonation — allows the token to impersonate the target identity on the local system.",
+                "Value": "SecurityImpersonation"
+              },
+              {
+                "Name": "TokenType",
+                "Description": "TokenPrimary — produces a token suitable for creating a new process, not just impersonation.",
+                "Value": "TokenPrimary"
+              },
+              {
+                "Name": "phNewToken",
+                "Description": "Output — receives the duplicated primary token that will be passed to CreateProcessWithTokenW.",
+                "Value": "&dToken"
+              }
+            ]
+          }
+        },
+        {
+          "Name": "Create Process With Token",
+          "Description": "Spawns cmd.exe under the identity of the stolen token, effectively running as the target privileged user.",
+          "Signature": {
+            "FunctionName": "CreateProcessWithTokenW",
+            "Parameters": [
+              {
+                "Name": "hToken",
+                "Description": "The duplicated primary token from the target process. This determines the security context of the spawned process.",
+                "Value": "dToken"
+              },
+              {
+                "Name": "dwLogonFlags",
+                "Description": "LOGON_WITH_PROFILE — loads the user profile of the token owner, making the environment match the target identity.",
+                "Value": "LOGON_WITH_PROFILE"
+              },
+              {
+                "Name": "lpApplicationName",
+                "Description": "Full path to cmd.exe — the process spawned under the stolen identity.",
+                "Value": "C:\\Windows\\System32\\cmd.exe"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "PrivilegeEscalation-FodHelperAbuse": {
+      "Steps": [
+        {
+          "Name": "Create Registry Key",
+          "Description": "Creates or opens the ms-settings shell command registry key under HKCU. This key is checked by fodhelper.exe on launch — writing here is the core of the UAC bypass since HKCU requires no elevation to write.",
+          "Signature": {
+            "FunctionName": "RegCreateKeyExA",
+            "Parameters": [
+              {
+                "Name": "hKey",
+                "Description": "HKEY_CURRENT_USER — writable by any user without elevation, making this bypass work from a medium-integrity process.",
+                "Value": "HKEY_CURRENT_USER"
+              },
+              {
+                "Name": "lpSubKey",
+                "Description": "The ms-settings shell command path that fodhelper.exe queries when it auto-elevates.",
+                "Value": "Software\\Classes\\ms-settings\\Shell\\Open\\command"
+              },
+              {
+                "Name": "samDesired",
+                "Description": "KEY_WRITE — only write access is needed to plant the payload values.",
+                "Value": "KEY_WRITE"
+              }
+            ]
+          }
+        },
+        {
+          "Name": "Set Command Value",
+          "Description": "Writes the command to execute into the default value of the registry key. When fodhelper.exe reads this key and auto-elevates, it will run this command with high integrity.",
+          "Signature": {
+            "FunctionName": "RegSetValueExA",
+            "Parameters": [
+              {
+                "Name": "lpValueName",
+                "Description": "NULL — sets the default (unnamed) value of the key, which is what fodhelper reads as the command to run.",
+                "Value": "NULL"
+              },
+              {
+                "Name": "dwType",
+                "Description": "REG_SZ — a null-terminated string value.",
+                "Value": "REG_SZ"
+              },
+              {
+                "Name": "lpData",
+                "Description": "The command to execute with elevated privileges — in this case launching cmd.exe.",
+                "Value": "cmd /c start C:\\Windows\\System32\\cmd.exe"
+              }
+            ]
+          }
+        },
+        {
+          "Name": "Set DelegateExecute Value",
+          "Description": "Creates the DelegateExecute value in the same key. Its mere presence — even as an empty string — signals to the Windows shell that the command should be auto-elevated, completing the hijack condition.",
+          "Signature": {
+            "FunctionName": "RegSetValueExA",
+            "Parameters": [
+              {
+                "Name": "lpValueName",
+                "Description": "DelegateExecute — the specific value name the shell checks to decide whether to auto-elevate the command.",
+                "Value": "DelegateExecute"
+              },
+              {
+                "Name": "lpData",
+                "Description": "Empty string — the value does not need content. Its existence is sufficient to trigger auto-elevation.",
+                "Value": ""
+              }
+            ]
+          }
+        },
+        {
+          "Name": "Execute FodHelper",
+          "Description": "Launches fodhelper.exe with the runas verb. Because fodhelper.exe is marked as auto-elevate in its manifest, Windows elevates it without showing a UAC prompt to the user. The elevated process then reads the hijacked registry key and executes the planted command.",
+          "Signature": {
+            "FunctionName": "ShellExecuteEx",
+            "Parameters": [
+              {
+                "Name": "lpVerb",
+                "Description": "runas — requests elevated execution. Combined with fodhelper's auto-elevate manifest flag, this bypasses the UAC consent dialog entirely.",
+                "Value": "runas"
+              },
+              {
+                "Name": "lpFile",
+                "Description": "fodhelper.exe — a trusted Windows binary with the auto-elevate manifest flag set, making it the bypass vehicle.",
+                "Value": "C:\\Windows\\System32\\fodhelper.exe"
+              },
+              {
+                "Name": "nShow",
+                "Description": "SW_NORMAL — shows the spawned window normally.",
+                "Value": "SW_NORMAL"
+              }
+            ]
+          }
+        }
+      ]
     }
   }
 }

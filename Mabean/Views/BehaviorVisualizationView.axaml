@@ -14,7 +14,7 @@
    <Border Padding="20">
      <Grid RowDefinitions="Auto,*" RowSpacing="16">
        <StackPanel Grid.Row="0" HorizontalAlignment="Left">
-         <TextBlock Classes="h4" Text="Behavior Analyzer" />
+         <TextBlock Classes="h4" Text="Behavior Visualizer" />
          <Border Height="8" />
            <Border Height="12"/>
          <ComboBox Width="255"

@@ -15,7 +15,7 @@ public partial class BehaviorVisualizationViewModel : ViewModelBase
     private ObservableCollection<string> _behaviors = new()
     {
         "Injection-Simple",
-        "Injection-Apc-MultiThreaded",
+        //"Injection-Apc-MultiThreaded",
         "Injection-Apc-EarlyBird",
         "PrivilegeEscalation-TokenTheft",
         "PrivilegeEscalation-FodHelperAbuse"

@@ -32,6 +32,18 @@ namespace Mabean.Builders
                     .GetProperty("Behavior-Description")
                     .GetProperty("Simple-Injection")
                     .GetProperty("Steps"),
+                "Injection-Apc-EarlyBird" => doc.RootElement
+                    .GetProperty("Behavior-Description")
+                    .GetProperty("Apc-EarlyBird")
+                    .GetProperty("Steps"),
+                "PrivilegeEscalation-TokenTheft" => doc.RootElement
+                    .GetProperty("Behavior-Description")
+                    .GetProperty("PrivilegeEscalation-TokenTheft")
+                    .GetProperty("Steps"),
+                "PrivilegeEscalation-FodHelperAbuse" => doc.RootElement
+                    .GetProperty("Behavior-Description")
+                    .GetProperty("PrivilegeEscalation-FodHelperAbuse")
+                    .GetProperty("Steps"),
                 _ => default
             };
 
