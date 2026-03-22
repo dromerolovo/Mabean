@@ -51,6 +51,7 @@ public partial class App : Application
                 services.AddSingleton<ProcessFinderService>();
                 services.AddSingleton<PayloadService>();
                 services.AddTransient<SimulateBehaviorService>();
+                services.AddTransient<ChainBehaviorService>();
                 
 
             })

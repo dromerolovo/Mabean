@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Mabean.Models;
 using Mabean.Services;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -10,18 +11,56 @@ namespace Mabean.ViewModels;
 public partial class BehaviorChainViewModel : ViewModelBase
 {
     private readonly PayloadService _payloadService;
-    private readonly SimulateBehaviorService _simulateBehaviorService;
+    private readonly ChainBehaviorService _chainBehaviorService;
 
-    public ObservableCollection<BehaviorChainStep> Steps { get; } = [];
+    private const string DefaultServiceBinaryPath = @"C:\path\to\3.exe";
 
-    public ObservableCollection<string> Behaviors { get; } = 
-    [
-        "Injection-Simple",
-        "Injection-Apc-MultiThreaded",
-        "Injection-Apc-EarlyBird",
-        "PrivilegeEscalation-TokenTheft",
-        "PrivilegeEscalation-FodHelperAbuse"
-    ];
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ShowPrivEscFields), nameof(ShowPrivEscPidField))]
+    private bool _privEscEnabled;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ShowPrivEscPidField))]
+    private string _privEscBehavior = "TokenTheft";
+
+    [ObservableProperty] private uint _privEscTargetPid;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ShowPersistenceFields), nameof(ShowPersistenceBinaryPathField))]
+    private bool _persistenceEnabled;
+
+    [ObservableProperty] private string _persistenceBehavior = "ServiceInstall";
+    [ObservableProperty] private string _persistenceServiceName = string.Empty;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ShowPersistenceBinaryPathField))]
+    private bool _persistenceUseDefaultPath = true;
+
+    [ObservableProperty] private string _persistenceBinaryPath = string.Empty;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ShowInjectionFields), nameof(ShowInjectionPidField), nameof(ShowInjectionProgramField))]
+    private bool _injectionEnabled;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ShowInjectionPidField), nameof(ShowInjectionProgramField))]
+    private string _injectionBehavior = "Simple";
+
+    [ObservableProperty] private uint _injectionTargetPid;
+    [ObservableProperty] private string _injectionProgramName = string.Empty;
+    [ObservableProperty] private string _injectionPayloadName = string.Empty;
+
+    public bool ShowPrivEscFields => PrivEscEnabled;
+    public bool ShowPrivEscPidField => PrivEscEnabled && PrivEscBehavior == "TokenTheft";
+    public bool ShowPersistenceFields => PersistenceEnabled;
+    public bool ShowPersistenceBinaryPathField => PersistenceEnabled && !PersistenceUseDefaultPath;
+    public bool ShowInjectionFields => InjectionEnabled;
+    public bool ShowInjectionPidField => InjectionEnabled && InjectionBehavior != "Apc-EarlyBird";
+    public bool ShowInjectionProgramField => InjectionEnabled && InjectionBehavior == "Apc-EarlyBird";
+
+    public IReadOnlyList<string> PrivEscBehaviors { get; } = ["TokenTheft", "FodHelperAbuse"];
+    public IReadOnlyList<string> PersistenceBehaviors { get; } = ["ServiceInstall"];
+    public IReadOnlyList<string> InjectionBehaviors { get; } = ["Simple", "Apc-MultiThreaded", "Apc-EarlyBird"];
 
     private ObservableCollection<string> _payloads = [];
     public ObservableCollection<string> Payloads
@@ -30,19 +69,15 @@ public partial class BehaviorChainViewModel : ViewModelBase
         private set => SetProperty(ref _payloads, value);
     }
 
-    public BehaviorChainViewModel(PayloadService payloadService, SimulateBehaviorService simulateBehaviorService)
+    public IAsyncRelayCommand RunChainCommand { get; }
+
+    public BehaviorChainViewModel(PayloadService payloadService, ChainBehaviorService chainBehaviorService)
     {
         _payloadService = payloadService;
-        _simulateBehaviorService = simulateBehaviorService;
-        AddStepCommand = new RelayCommand(AddStep);
-        RemoveStepCommand = new RelayCommand<BehaviorChainStep>(RemoveStep);
+        _chainBehaviorService = chainBehaviorService;
         RunChainCommand = new AsyncRelayCommand(RunChain);
         _ = LoadPayloads();
     }
-
-    public IRelayCommand AddStepCommand { get; }
-    public IRelayCommand<BehaviorChainStep> RemoveStepCommand { get; }
-    public IAsyncRelayCommand RunChainCommand { get; }
 
     private async Task LoadPayloads()
     {
@@ -51,107 +86,36 @@ public partial class BehaviorChainViewModel : ViewModelBase
             Payloads = new ObservableCollection<string>(payloads);
     }
 
-    private void AddStep()
-    {
-        var index = Steps.Count + 1;
-        var step = new BehaviorChainStep
-        {
-            Name = $"Step {index}",
-            Behavior = Behaviors[0],
-            BehaviorOptions = Behaviors,
-            PayloadOptions = Payloads
-        };
-        step.RemoveCommand = new RelayCommand(() => RemoveStep(step));
-        Steps.Add(step);
-
-        UpdateConnectors();
-    }
-
-    private void RemoveStep(BehaviorChainStep? step)
-    {
-        if (step is null) return;
-        Steps.Remove(step);
-        UpdateConnectors();
-    }
-
     private async Task RunChain()
     {
-        
-    }
+        var resolvedBinaryPath = PersistenceUseDefaultPath ? DefaultServiceBinaryPath : PersistenceBinaryPath;
+        var fodHelperCommand = $@"cmd /c start cmd /c ""sc create {PersistenceServiceName} binPath= {resolvedBinaryPath} start= auto && sc start {PersistenceServiceName}""";
 
-    private void UpdateConnectors()
-    {
-        for (var i = 0; i < Steps.Count; i++)
+        var definition = new BehaviorChainDefinition
         {
-            Steps[i].ShowConnector = i < Steps.Count - 1;
-        }
-    }
-}
-
-public sealed partial class BehaviorChainStep : ObservableObject
-{
-    private string _name = string.Empty;
-    private string _behavior = string.Empty;
-    private bool _showConnector;
-    private IRelayCommand? _removeCommand;
-    private uint _puid;
-    private string _payloadName = string.Empty;
-    private string _programName = string.Empty;
-
-    public IReadOnlyList<string> BehaviorOptions { get; set; } = [];
-    public IReadOnlyList<string> PayloadOptions { get; set; } = [];
-
-    public IRelayCommand? RemoveCommand
-    {
-        get => _removeCommand;
-        set => SetProperty(ref _removeCommand, value);
-    }
-
-    public string Name
-    {
-        get => _name;
-        set => SetProperty(ref _name, value);
-    }
-
-    public string Behavior
-    {
-        get => _behavior;
-        set
-        {
-            if (SetProperty(ref _behavior, value))
+            PrivEsc = PrivEscEnabled ? new PrivEscStep
             {
-                OnPropertyChanged(nameof(ShowPayloadField));
-                OnPropertyChanged(nameof(ShowPuidField));
-                OnPropertyChanged(nameof(ShowProgramNameField));
-            }
-        }
-    }
+                Behavior = PrivEscBehavior,
+                TargetPid = PrivEscBehavior == "TokenTheft" ? PrivEscTargetPid : null,
+                ExecPath = PrivEscBehavior == "FodHelperAbuse" ? fodHelperCommand : null
+            } : null,
 
-    public uint Puid
-    {
-        get => _puid;
-        set => SetProperty(ref _puid, value);
-    }
+            Persistence = PersistenceEnabled ? new PersistenceStep
+            {
+                Behavior = PersistenceBehavior,
+                ServiceName = PersistenceServiceName,
+                BinaryPath = resolvedBinaryPath
+            } : null,
 
-    public string PayloadName
-    {
-        get => _payloadName;
-        set => SetProperty(ref _payloadName, value);
-    }
+            Injection = InjectionEnabled ? new InjectionStep
+            {
+                Behavior = InjectionBehavior,
+                TargetPid = InjectionBehavior != "Apc-EarlyBird" ? InjectionTargetPid : null,
+                ProgramName = InjectionBehavior == "Apc-EarlyBird" ? InjectionProgramName : null,
+                PayloadName = InjectionPayloadName
+            } : null
+        };
 
-    public string ProgramName
-    {
-        get => _programName;
-        set => SetProperty(ref _programName, value);
+        await _chainBehaviorService.RunChainAsync(definition);
     }
-
-    public bool ShowConnector
-    {
-        get => _showConnector;
-        set => SetProperty(ref _showConnector, value);
-    }
-
-    public bool ShowPayloadField => _behavior.StartsWith("Injection");
-    public bool ShowPuidField => !_behavior.Equals("Injection-Apc-EarlyBird");
-    public bool ShowProgramNameField => _behavior.Equals("Injection-Apc-EarlyBird");
 }
