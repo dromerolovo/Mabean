@@ -19,6 +19,8 @@ $configJsonPath = Join-Path $payloadsDir "payloads.json"
 $dlls = Join-Path $dataDir "Dlls"
 $executables = Join-Path $dataDir "Executables"
 
+$chain = Join-Path $dataDir "Chain"
+
 $logs = Join-Path $dataDir "Logs"
 
 
@@ -46,6 +48,9 @@ if(-Not (Test-Path $executables)) {
     New-Item -ItemType Directory -Path $executables | Out-Null
 }
 
+if(-Not (Test-Path $chain)) {
+    New-Item -ItemType Directory -Path $chain | Out-Null
+}
 
 if (-Not (Test-Path $logs)) {
     New-Item -ItemType Directory -Path $logs | Out-Null
@@ -60,6 +65,7 @@ if (-Not (Test-Path $keyBinPath)) {
 
 Copy-Item "$PSScriptRoot\MabeanScripts\Injection\1\x64\Release\1.dll" -Destination (Join-Path $dlls "1.dll")  -Force
 Copy-Item "$PSScriptRoot\MabeanScripts\PrivilegeEscalation\2\x64\Release\2.dll" -Destination (Join-Path $dlls "2.dll")  -Force
+Copy-Item "$PSScriptRoot\MabeanScripts\PrivilegeEscalation\3\x64\Release\3.exe" -Destination (Join-Path $executables "3.exe")  -Force
 Copy-Item "$PSScriptRoot\MabeanMarker.exe" -Destination (Join-Path $dataDir "MabeanMarker.exe")  -Force
 
 Set-MpPreference -ExclusionPath $payloadsDir
