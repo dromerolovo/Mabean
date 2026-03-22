@@ -137,34 +137,6 @@
               }
             ]
           }
-        },
-        {
-          "Name": "Close Thread Handle",
-          "Description": "Releases the thread handle. The injected thread continues running — this only closes the caller's reference to it.",
-          "Signature": {
-            "FunctionName": "CloseHandle",
-            "Parameters": [
-              {
-                "Name": "hObject",
-                "Description": "The remote thread handle returned by CreateRemoteThread.",
-                "Value": "hThread"
-              }
-            ]
-          }
-        },
-        {
-          "Name": "Close Process Handle",
-          "Description": "Releases the process handle, completing cleanup. The injected thread remains running inside the target process.",
-          "Signature": {
-            "FunctionName": "CloseHandle",
-            "Parameters": [
-              {
-                "Name": "hObject",
-                "Description": "The target process handle obtained from OpenProcess.",
-                "Value": "hProcess"
-              }
-            ]
-          }
         }
       ]
     },

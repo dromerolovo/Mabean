@@ -41,7 +41,7 @@ namespace Mabean.ViewModels
 
         public bool ShowPayloadField => SelectedBehavior.StartsWith("Injection");
         public bool ShowProgramNameField => SelectedBehavior.Equals("Injection-Apc-EarlyBird");
-        public bool ShowPuidField => !SelectedBehavior.Equals("Injection-Apc-EarlyBird");
+        public bool ShowPuidField => !SelectedBehavior.Equals("Injection-Apc-EarlyBird") && !SelectedBehavior.Equals("PrivilegeEscalation-FodHelperAbuse");
 
         public BehaviorSimulationViewModel(PayloadService payloadService, SimulateBehaviorService simulateBehaviorService)
         {

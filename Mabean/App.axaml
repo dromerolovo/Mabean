@@ -32,6 +32,9 @@
 		<DataTemplate DataType="{x:Type vm:BehaviorVisualizationViewModel}">
 			<views:BehaviorVisualizationView />
 		</DataTemplate>
+		<DataTemplate DataType="{x:Type vm:BehaviorChainViewModel}">
+			<views:BehaviorChainView />
+		</DataTemplate>
 
 	</Application.DataTemplates>
 </Application>

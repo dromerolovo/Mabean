@@ -1,0 +1,76 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:Mabean.ViewModels"
+             xmlns:shadui="clr-namespace:ShadUI;assembly=ShadUI"
+             mc:Ignorable="d"
+             d:DesignWidth="900"
+             d:DesignHeight="600"
+             x:Class="Mabean.Views.BehaviorChainView"
+             x:DataType="vm:BehaviorChainViewModel">
+
+    <Border Padding="20">
+        <Grid RowDefinitions="Auto,*,Auto" RowSpacing="16">
+           <Grid Grid.Row="0" ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                <TextBlock Classes="h4" Text="Behavior Chain" />
+                <Button Grid.Column="1" Classes="Outline" Content="Add Step" Command="{Binding AddStepCommand}" />
+            </Grid>
+
+          <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                <ItemsControl ItemsSource="{Binding Steps}" HorizontalAlignment="Center" MaxWidth="520">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel Spacing="20" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                      <DataTemplate>
+                            <StackPanel Spacing="12" HorizontalAlignment="Center">
+                                <Border Background="#1E1E1E" BorderBrush="#2A2A2A" BorderThickness="1" CornerRadius="12" Padding="16" Width="520">
+                                    <StackPanel Spacing="10">
+                                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                                            <TextBox Text="{Binding Name}" Watermark="Step name" />
+                                            <Button Grid.Column="1"
+                                                    Classes="Outline"
+                                                    Content="Remove"
+                                                    Command="{Binding RemoveCommand}" />
+                                        </Grid>
+                                        <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                            <TextBlock Text="Behavior" Foreground="#9FB0D8" Width="80" VerticalAlignment="Center" />
+                                            <ComboBox Width="300"
+                                                ItemsSource="{Binding BehaviorOptions}"
+                                                SelectedItem="{Binding Behavior}" />
+                                        </StackPanel>
+                                        <StackPanel IsVisible="{Binding ShowPayloadField}" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                            <TextBlock Text="Payload" Foreground="#9FB0D8" Width="80" VerticalAlignment="Center" />
+                                            <ComboBox Width="300"
+                                                ItemsSource="{Binding PayloadOptions}"
+                                                SelectedItem="{Binding PayloadName}" />
+                                        </StackPanel>
+                                        <StackPanel IsVisible="{Binding ShowPuidField}" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                            <TextBlock Text="Process ID" Foreground="#9FB0D8" Width="80" VerticalAlignment="Center" />
+                                            <TextBox Width="300" Text="{Binding Puid}" Watermark="Process ID" />
+                                        </StackPanel>
+                                        <StackPanel IsVisible="{Binding ShowProgramNameField}" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                            <TextBlock Text="Program" Foreground="#9FB0D8" Width="80" VerticalAlignment="Center" />
+                                            <TextBox Width="300" Text="{Binding ProgramName}" Watermark="Program name" />
+                                        </StackPanel>
+                                    </StackPanel>
+                                </Border>
+                                <Border Height="24" Width="2" Background="#2A2A2A" HorizontalAlignment="Center" IsVisible="{Binding ShowConnector}" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+
+            <Button Grid.Row="2"
+                    Classes="Primary"
+                    Content="Run Chain"
+                    HorizontalAlignment="Right"
+                    Command="{Binding RunChainCommand}" />
+        </Grid>
+    </Border>
+
+</UserControl>
