@@ -17,6 +17,7 @@ $payloadsDir = Join-Path $dataDir "payloads"
 $configJsonPath = Join-Path $payloadsDir "payloads.json"
 
 $dlls = Join-Path $dataDir "Dlls"
+$executables = Join-Path $dataDir "Executables"
 
 $logs = Join-Path $dataDir "Logs"
 
@@ -40,6 +41,11 @@ if (-Not (Test-Path $configJsonPath)) {
 if (-Not (Test-Path $dlls)) {
     New-Item -ItemType Directory -Path $dlls | Out-Null
 }
+
+if(-Not (Test-Path $executables)) {
+    New-Item -ItemType Directory -Path $executables | Out-Null
+}
+
 
 if (-Not (Test-Path $logs)) {
     New-Item -ItemType Directory -Path $logs | Out-Null

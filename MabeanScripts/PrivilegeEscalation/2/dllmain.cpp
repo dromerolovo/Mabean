@@ -109,7 +109,7 @@ extern "C" __declspec(dllexport) int TokenTheftEscalation(DWORD pid) {
     return 0;
 }
 
-extern "C" __declspec(dllexport) int FodHelperAbuseEscalation() {
+extern "C" __declspec(dllexport) int FodHelperAbuseEscalation(const char* execPath) {
 
     Marker();
 
@@ -146,7 +146,7 @@ extern "C" __declspec(dllexport) int FodHelperAbuseEscalation() {
 
     Marker();
 
-    FodHelperAbuseEscalationInternal();
+    FodHelperAbuseEscalationInternal(execPath);
 
     RevertToSelf();
     CloseHandle(hImpersonation);

