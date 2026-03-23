@@ -14,6 +14,11 @@ namespace Mabean.Helpers
         public static readonly string PayloadsDir = Path.Combine(DataDir, "payloads");
         public static readonly string ConfigJsonPath = Path.Combine(PayloadsDir, "payloads.json");
         public static readonly string Dlls = Path.Combine(DataDir, "Dlls");
-        public static readonly string Logs = Path.Combine(DataDir, "Logs"); 
+        public static readonly string Logs = Path.Combine(DataDir, "Logs");
+        public static readonly string SessionConfigDir = Path.Combine(DataDir, "SessionConfig");
+        public static readonly string SessionConfigPath = Path.Combine(SessionConfigDir, "config.json");
+        
+        public static readonly string ExecutablesDir = Path.Combine(MabeanDir, "Executables");
+        public static readonly string ServiceBinaryPath = Path.Combine(ExecutablesDir, "3.exe");
     }
 }
