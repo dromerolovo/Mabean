@@ -1,29 +1,35 @@
-// 3.cpp : This file contains the 'main' function. Program execution begins and ends there.
-//
+
+#define _CRT_SECURE_NO_WARNINGS 
 
 #include <iostream>
 #include <windows.h>
+#include <stdio.h>
+#include <string.h>
 
 #define SLEEP_TIME 5000
 
 SERVICE_STATUS serviceStatus;
 SERVICE_STATUS_HANDLE hStatus;
 
+wchar_t serviceName[] = L"";
+
 void ServiceMain(int argc, char** argv);
 void ControlHandler(DWORD request);
 
 int main()
 {
+
     SERVICE_TABLE_ENTRY ServiceTable[] = {
-      {(LPWSTR)L"AppInfoL", (LPSERVICE_MAIN_FUNCTION)ServiceMain},
-      {NULL, NULL}
-        };
+        {serviceName, (LPSERVICE_MAIN_FUNCTION)ServiceMain},
+        {NULL, NULL}
+    };
 
     StartServiceCtrlDispatcher(ServiceTable);
     return 0;
 }
 
-void ServiceMain(int argc, char** argv) {
+void ServiceMain(int argc, char** argv)
+{
     serviceStatus.dwServiceType = SERVICE_WIN32;
     serviceStatus.dwCurrentState = SERVICE_START_PENDING;
     serviceStatus.dwControlsAccepted = SERVICE_ACCEPT_STOP | SERVICE_ACCEPT_SHUTDOWN;
@@ -32,7 +38,7 @@ void ServiceMain(int argc, char** argv) {
     serviceStatus.dwCheckPoint = 0;
     serviceStatus.dwWaitHint = 0;
 
-    hStatus = RegisterServiceCtrlHandler(L"AppInfoL", (LPHANDLER_FUNCTION)ControlHandler);
+    hStatus = RegisterServiceCtrlHandler(serviceName, (LPHANDLER_FUNCTION)ControlHandler);
 
     serviceStatus.dwCurrentState = SERVICE_RUNNING;
     SetServiceStatus(hStatus, &serviceStatus);
@@ -43,8 +49,8 @@ void ServiceMain(int argc, char** argv) {
     return;
 }
 
-
-void ControlHandler(DWORD request) {
+void ControlHandler(DWORD request)
+{
     switch (request) {
     case SERVICE_CONTROL_STOP:
         serviceStatus.dwWin32ExitCode = 0;

