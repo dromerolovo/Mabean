@@ -21,10 +21,10 @@ public class ChainBehaviorService
     {
         if (chain.Persistence is { } persistenceConfig)
         {
-            var config = new { serviceName = persistenceConfig.ServiceName };
-            var json = JsonSerializer.Serialize(config);
-            await File.WriteAllTextAsync(Paths.SessionConfigPath, json);
-            LoggerService.Write($"[Chain] Session config written: {Paths.SessionConfigPath}");
+            //var config = new { serviceName = persistenceConfig.ServiceName };
+            //var json = JsonSerializer.Serialize(config);
+            //await File.WriteAllTextAsync(Paths.SessionConfigPath, json);
+            //LoggerService.Write($"[Chain] Session config written: {Paths.SessionConfigPath}");
         }
 
         if (chain.PrivEsc is { } privEsc)
@@ -56,6 +56,15 @@ public class ChainBehaviorService
             switch (injection.Behavior)
             {
                 case "Simple":
+                    var context = new BehaviorContext
+                    {
+                        BehaviorName = "Injection-Simple",
+                        DllPath = Path.Combine(Paths.Dlls, "1.dll").ToString(),
+                        TargetPID = injection.TargetPid ?? 0,
+                        ProgramName = null,
+                        PayloadPath = injection.PayloadName
+                    };
+                    await WriteBehaviorContext(context);
                     var code3 = InteropInjection.InjectPayloadSimple(injection.TargetPid ?? 0, payload, (uint)payload.Length);
                     LoggerService.Write($"[Chain] Simple injection result: {code3}");
                     break;
@@ -64,10 +73,25 @@ public class ChainBehaviorService
                     LoggerService.Write($"[Chain] APC multi-threaded injection result: {code4}");
                     break;
                 case "Apc-EarlyBird":
+                    var context2 = new BehaviorContext
+                    {
+                        BehaviorName = "Injection-Simple",
+                        DllPath = Path.Combine(Paths.Dlls, "1.dll").ToString(),
+                        TargetPID = injection.TargetPid ?? 0,
+                        ProgramName = injection.ProgramName,
+                        PayloadPath = injection.PayloadName
+                    };
+                    await WriteBehaviorContext(context2);
                     var code5 = InteropInjection.InjectPayloadApcEarlyBird(injection.ProgramName!, payload, (nuint)payload.Length);
                     LoggerService.Write($"[Chain] APC early bird injection result: {code5}");
                     break;
             }
         }
+    }
+
+    private async Task WriteBehaviorContext(BehaviorContext ctx)
+    {
+        var json = JsonSerializer.SerializeToNode(ctx);
+        await File.WriteAllTextAsync(Paths.SessionConfigPath, json.ToString());
     }
 }
