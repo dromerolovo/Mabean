@@ -11,90 +11,173 @@
              VerticalAlignment="Stretch"
              HorizontalAlignment="Stretch">
 
-    <Border Padding="20">
-        <Grid RowDefinitions="Auto Auto Auto * Auto" >
+    <UserControl.Styles>
+        <Style Selector="DataGrid">
+            <Setter Property="Background" Value="#070C14"/>
+            <Setter Property="RowBackground" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="Foreground" Value="#9FB0D8"/>
+            <Setter Property="GridLinesVisibility" Value="Horizontal"/>
+            <Setter Property="HorizontalGridLinesBrush" Value="#1E2639"/>
+            <Setter Property="VerticalGridLinesBrush" Value="Transparent"/>
+            <Setter Property="RowHeight" Value="34"/>
+        </Style>
+        <Style Selector="DataGridColumnHeader">
+            <Setter Property="Background" Value="#090E18"/>
+            <Setter Property="Foreground" Value="#6B7280"/>
+            <Setter Property="FontSize" Value="10"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Height" Value="32"/>
+            <Setter Property="Padding" Value="12,0"/>
+            <Setter Property="BorderBrush" Value="#2A2E39"/>
+            <Setter Property="BorderThickness" Value="0,0,0,1"/>
+        </Style>
+        <Style Selector="DataGridRow:pointerover /template/ Rectangle#BackgroundRectangle">
+            <Setter Property="Fill" Value="#0D1525"/>
+            <Setter Property="Opacity" Value="1"/>
+        </Style>
+        <Style Selector="Button.selectBtn">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="CornerRadius" Value="0"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Width" Value="28"/>
+            <Setter Property="Height" Value="28"/>
+            <Setter Property="Foreground" Value="#3D4A5C"/>
+            <Setter Property="FontSize" Value="12"/>
+        </Style>
+        <Style Selector="Button.selectBtn:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="TextElement.Foreground" Value="#C6F36E"/>
+        </Style>
+        <Style Selector="Button.pageBtn">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderBrush" Value="#2A2E39"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="0"/>
+            <Setter Property="Padding" Value="12,0"/>
+            <Setter Property="Height" Value="26"/>
+            <Setter Property="Foreground" Value="#6B7280"/>
+            <Setter Property="FontSize" Value="10"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+        </Style>
+        <Style Selector="Button.pageBtn:pointerover">
+            <Setter Property="Foreground" Value="#D1D4DC"/>
+            <Setter Property="BorderBrush" Value="#3D4455"/>
+        </Style>
+        <Style Selector="Button.pageBtn:disabled">
+            <Setter Property="Opacity" Value="0.3"/>
+        </Style>
+    </UserControl.Styles>
 
-            <TextBlock Grid.Row="0"
-                       Classes="h4"
-                       Text="Process Finder" />
+    <Grid Background="#070C14" RowDefinitions="Auto,*,Auto">
 
-            <Border Grid.Row="1" Height="12" />
+        <!-- Search bar -->
+        <Border Grid.Row="0"
+                Background="#0D1117"
+                BorderBrush="#2A2E39"
+                BorderThickness="0,0,0,1">
+            <Grid ColumnDefinitions="*,Auto" Margin="0">
+                <TextBox Background="Transparent"
+                         BorderThickness="0"
+                         CornerRadius="0"
+                         Height="34"
+                         Padding="14,0"
+                         FontSize="11"
+                         Foreground="#D1D4DC"
+                         Watermark="FILTER — pid, name, user..."
+                         Text="{Binding SearchQuery}"
+                         VerticalContentAlignment="Center"/>
+                <Border Grid.Column="1"
+                        Width="34" Height="34"
+                        Background="Transparent"
+                        VerticalAlignment="Center"
+                        HorizontalAlignment="Center">
+                    <TextBlock Text="⌕"
+                               FontSize="16"
+                               Foreground="#3D4A5C"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"/>
+                </Border>
+            </Grid>
+        </Border>
 
-            <StackPanel Grid.Row="2"
-                        Orientation="Horizontal"
-                        HorizontalAlignment="Right"
-                        Margin="0,0,0,16">
-                <Button Classes="Outline"
-                        Command="{Binding LoadProcessesCommand}"
-                        IsEnabled="{Binding !IsLoading}"
-                        Content="Refresh" />
-            </StackPanel>
+        <DataGrid Grid.Row="1"
+                  ItemsSource="{Binding PagedProcesses}"
+                  IsReadOnly="True"
+                  SelectionMode="Single"
+                  HeadersVisibility="Column"
+                  VerticalScrollBarVisibility="Auto"
+                  HorizontalScrollBarVisibility="Auto">
+            <DataGrid.Columns>
 
-            <DataGrid Grid.Row="3"
-                      ItemsSource="{Binding PagedProcesses}"
-                      IsReadOnly="True"
-                      SelectionMode="Single"
-                      HeadersVisibility="Column"
-                      VerticalScrollBarVisibility="Visible"
-                      HorizontalScrollBarVisibility="Auto">
-                <DataGrid.Columns>
+                <DataGridTemplateColumn Width="40"
+                                        CanUserResize="False"
+                                        CanUserSort="False">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate DataType="models:ProcessInfo">
+                            <Button Classes="selectBtn"
+                                    Content="→"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    Command="{Binding $parent[UserControl].((vm:ProcessFinderViewModel)DataContext).SelectProcessCommand}"
+                                    CommandParameter="{Binding}"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
 
-                    <DataGridTemplateColumn Width="80" Header="PID">
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
-                                <SelectableTextBlock Text="{Binding ProcessId}"
-                                                     VerticalAlignment="Center"
-                                                     Margin="12,0" />
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
+                <DataGridTextColumn Width="80"
+                                    Binding="{Binding ProcessId}"
+                                    Header="PID"/>
 
-                    <DataGridTemplateColumn Width="600" Header="Name">
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
-                                <SelectableTextBlock Text="{Binding ProcessName}"
-                                                     VerticalAlignment="Center"
-                                                     Margin="12,0" />
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
+                <DataGridTextColumn Width="*"
+                                    Binding="{Binding ProcessName}"
+                                    Header="NAME"/>
 
-                    <DataGridTemplateColumn Width="400" Header="User">
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
-                                <SelectableTextBlock Text="{Binding UserName}"
-                                                     VerticalAlignment="Center"
-                                                     Margin="12,0" />
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
+                <DataGridTextColumn Width="200"
+                                    Binding="{Binding UserName}"
+                                    Header="USER"/>
 
-                </DataGrid.Columns>
-            </DataGrid>
+            </DataGrid.Columns>
+        </DataGrid>
 
-            <Grid Grid.Row="4" ColumnDefinitions="* Auto" Margin="0,16,0,0">
-                <TextBlock VerticalAlignment="Center" Classes="Small Muted">
-                    <Run Text="Page" />
-                    <Run Text="{Binding CurrentPage}" />
-                    <Run Text="of" />
-                    <Run Text="{Binding TotalPages}" />
-                    <Run Text="—" />
-                    <Run Text="{Binding Processes.Count}" />
-                    <Run Text="process(es) found." />
-                </TextBlock>
-                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
-                    <Button Classes="Outline"
+        <!-- Pagination bar -->
+        <Border Grid.Row="2"
+                Background="#090E18"
+                BorderBrush="#2A2E39"
+                BorderThickness="0,1,0,0"
+                Padding="14,8">
+            <Grid ColumnDefinitions="*,Auto">
+                <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                    <TextBlock FontSize="10" FontWeight="SemiBold" Foreground="#6B7280" VerticalAlignment="Center">
+                        <Run Text="PAGE"/>
+                    </TextBlock>
+                    <Border Background="#161D2C" BorderBrush="#2A2E39" BorderThickness="1" Padding="7,2" VerticalAlignment="Center">
+                        <TextBlock FontSize="10" Foreground="#9FB0D8">
+                            <Run Text="{Binding CurrentPage}"/>
+                            <Run Text=" / "/>
+                            <Run Text="{Binding TotalPages}"/>
+                        </TextBlock>
+                    </Border>
+                    <TextBlock FontSize="10" Foreground="#6B7280" VerticalAlignment="Center" Margin="6,0,0,0">
+                        <Run Text="{Binding Processes.Count}"/>
+                        <Run Text=" PROCESSES"/>
+                    </TextBlock>
+                </StackPanel>
+                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6">
+                    <Button Classes="pageBtn"
                             Command="{Binding PreviousPageCommand}"
                             IsEnabled="{Binding HasPreviousPage}"
-                            Content="Previous" />
-                    <Button Classes="Outline"
+                            Content="◀  PREV"/>
+                    <Button Classes="pageBtn"
                             Command="{Binding NextPageCommand}"
                             IsEnabled="{Binding HasNextPage}"
-                            Content="Next" />
+                            Content="NEXT  ▶"/>
                 </StackPanel>
             </Grid>
+        </Border>
 
-        </Grid>
-    </Border>
+    </Grid>
 
 </UserControl>

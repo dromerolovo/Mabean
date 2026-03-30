@@ -4,6 +4,7 @@ using Mabean.Helpers;
 using Mabean.Models;
 using Mabean.Services;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
@@ -36,20 +37,46 @@ namespace Mabean.ViewModels
         [ObservableProperty]
         private bool _hasNextPage;
 
+        [ObservableProperty]
+        private string _searchQuery = "";
+
+        public Action<int>? ProcessSelected { get; set; }
+
+        partial void OnSearchQueryChanged(string value)
+        {
+            CurrentPage = 1;
+            UpdatePage();
+        }
+
         public ProcessFinderViewModel(ProcessFinderService processFinderService)
         {
             _processFinderService = processFinderService;
             IsActive = true;
         }
 
+        [RelayCommand]
+        private void SelectProcess(ProcessInfo process) => ProcessSelected?.Invoke(process.ProcessId);
+
+        private IEnumerable<ProcessInfo> GetFiltered()
+        {
+            if (string.IsNullOrWhiteSpace(SearchQuery))
+                return Processes;
+            var q = SearchQuery.Trim();
+            return Processes.Where(p =>
+                p.ProcessName.Contains(q, StringComparison.OrdinalIgnoreCase) ||
+                p.ProcessId.ToString().Contains(q) ||
+                p.UserName.Contains(q, StringComparison.OrdinalIgnoreCase));
+        }
+
         private void UpdatePage()
         {
-            TotalPages = (int)Math.Ceiling(Processes.Count / (double)PageSize);
+            var filtered = GetFiltered().ToList();
+            TotalPages = (int)Math.Ceiling(filtered.Count / (double)PageSize);
             if (TotalPages == 0) TotalPages = 1;
             HasPreviousPage = CurrentPage > 1;
             HasNextPage = CurrentPage < TotalPages;
             PagedProcesses = new ObservableCollection<ProcessInfo>(
-                Processes.Skip((CurrentPage - 1) * PageSize).Take(PageSize));
+                filtered.Skip((CurrentPage - 1) * PageSize).Take(PageSize));
         }
 
         [RelayCommand]

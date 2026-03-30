@@ -33,8 +33,9 @@ namespace Mabean.ViewModels
 
         [ObservableProperty]
         private string _selectedPayload = "";
+
         [ObservableProperty]
-        private uint _puid = default;
+        private string _puid = "";
 
         [ObservableProperty]
         private string _programName = "";
@@ -43,12 +44,17 @@ namespace Mabean.ViewModels
         public bool ShowProgramNameField => SelectedBehavior.Equals("Injection-Apc-EarlyBird");
         public bool ShowPuidField => !SelectedBehavior.Equals("Injection-Apc-EarlyBird") && !SelectedBehavior.Equals("PrivilegeEscalation-FodHelperAbuse");
 
+        public Action? BrowseProcessesRequested { get; set; }
+
         public BehaviorSimulationViewModel(PayloadService payloadService, SimulateBehaviorService simulateBehaviorService)
         {
             _payloadService = payloadService;
             _ = LoadPayloads();
             _simulateBehaviorService = simulateBehaviorService;
         }
+
+        [RelayCommand]
+        private void BrowseProcesses() => BrowseProcessesRequested?.Invoke();
 
         [RelayCommand]
         private async Task LoadPayloads()
@@ -65,7 +71,8 @@ namespace Mabean.ViewModels
         {
             Console.WriteLine(ProgramName);
             LoggerService.Write($"[+] Executing behavior: {SelectedBehavior} into process with PUID: {Puid} using payload: {SelectedPayload}");
-            await _simulateBehaviorService.InjectBehavior(Puid, SelectedBehavior, SelectedPayload, ProgramName);
+            uint.TryParse(Puid, out var puid);
+            await _simulateBehaviorService.InjectBehavior(puid, SelectedBehavior, SelectedPayload, ProgramName);
         }
 
         partial void OnSelectedBehaviorChanged(string value)
