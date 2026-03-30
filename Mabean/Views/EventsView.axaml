@@ -38,20 +38,70 @@
         <Style Selector="DataGridRow:selected">
             <Setter Property="Background" Value="#111D30"/>
         </Style>
+        <!-- Indicator: default collapsed state -->
+        <Style Selector="TextBlock.expand-indicator">
+            <Setter Property="Text" Value="▶"/>
+            <Setter Property="Foreground" Value="#3D4A5C"/>
+            <Setter Property="FontSize" Value="9"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+        </Style>
+        <!-- Indicator: expanded (row selected) state -->
+        <Style Selector="DataGridRow:selected TextBlock.expand-indicator">
+            <Setter Property="Text" Value="▼"/>
+            <Setter Property="Foreground" Value="#C6F36E"/>
+        </Style>
     </UserControl.Styles>
 
     <Grid Background="#070C14" RowDefinitions="*,Auto">
 
         <!-- Events table fills available space -->
         <DataGrid Grid.Row="0"
+                  x:Name="EventsGrid"
                   ItemsSource="{Binding SecurityEvents}"
                   IsReadOnly="True"
                   SelectionMode="Single"
                   HeadersVisibility="Column"
+                  RowDetailsVisibilityMode="VisibleWhenSelected"
                   VerticalScrollBarVisibility="Auto"
                   HorizontalScrollBarVisibility="Auto">
 
+            <DataGrid.RowDetailsTemplate>
+                <DataTemplate DataType="models:SecurityEvent">
+                    <Border Background="#0A1220"
+                            BorderBrush="#2A2E39"
+                            BorderThickness="0,0,0,1"
+                            Padding="0">
+                        <Grid ColumnDefinitions="3,*">
+                            <Border Grid.Column="0" Background="#C6F36E"/>
+                            <Border Grid.Column="1" Padding="14,10,14,12">
+                                <StackPanel Spacing="4">
+                                    <TextBlock Text="MESSAGE"
+                                               FontSize="10"
+                                               FontWeight="SemiBold"
+                                               Foreground="#6B7280"/>
+                                    <TextBlock Text="{Binding Message}"
+                                               FontSize="11"
+                                               Foreground="#D1D4DC"
+                                               TextWrapping="Wrap"/>
+                                </StackPanel>
+                            </Border>
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </DataGrid.RowDetailsTemplate>
+
             <DataGrid.Columns>
+
+                <DataGridTemplateColumn Width="36"
+                                        CanUserResize="False"
+                                        CanUserSort="False">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate DataType="models:SecurityEvent">
+                            <TextBlock Classes="expand-indicator"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
 
                 <DataGridTextColumn Width="90"
                                     Binding="{Binding RecordId}"
@@ -79,25 +129,9 @@
                                     Binding="{Binding Source}"
                                     Header="SOURCE"/>
 
-                <DataGridTextColumn Width="140"
+                <DataGridTextColumn Width="*"
                                     Binding="{Binding TaskCategory}"
                                     Header="CATEGORY"/>
-
-                <DataGridTemplateColumn Width="*"
-                                        CanUserSort="False"
-                                        Header="MESSAGE">
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate DataType="models:SecurityEvent">
-                            <TextBlock Margin="12,0"
-                                       VerticalAlignment="Center"
-                                       FontSize="11"
-                                       Foreground="#9FB0D8"
-                                       Text="{Binding Message}"
-                                       TextTrimming="CharacterEllipsis"
-                                       ToolTip.Tip="{Binding Message}"/>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
 
                 <DataGridTemplateColumn Width="44"
                                         CanUserResize="False"
