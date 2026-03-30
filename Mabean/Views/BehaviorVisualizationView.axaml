@@ -11,107 +11,130 @@
              VerticalAlignment="Stretch"
              HorizontalAlignment="Stretch">
 
-   <Border Padding="20">
-     <Grid RowDefinitions="Auto,*" RowSpacing="16">
-       <StackPanel Grid.Row="0" HorizontalAlignment="Left">
-         <TextBlock Classes="h4" Text="Behavior Visualizer" />
-         <Border Height="8" />
-           <Border Height="12"/>
-         <ComboBox Width="255"
-                   ItemsSource="{Binding Behaviors}"
-                   SelectedItem="{Binding SelectedBehavior}" />
-           <Border Height="12"/>
-       </StackPanel>
+    <Border Background="#070C14">
+        <Border.Background>
+            <DrawingBrush TileMode="Tile"
+                          DestinationRect="0,0,80,46"
+                          Stretch="None">
+                <DrawingBrush.Drawing>
+                    <DrawingGroup>
+                        <GeometryDrawing>
+                            <GeometryDrawing.Pen>
+                                <Pen Brush="#111D2A" Thickness="1"/>
+                            </GeometryDrawing.Pen>
+                            <GeometryDrawing.Geometry>
+                                <GeometryGroup>
+                                    <LineGeometry StartPoint="40,0" EndPoint="80,23"/>
+                                    <LineGeometry StartPoint="0,23" EndPoint="40,0"/>
+                                    <LineGeometry StartPoint="0,23" EndPoint="40,46"/>
+                                    <LineGeometry StartPoint="40,46" EndPoint="80,23"/>
+                                </GeometryGroup>
+                            </GeometryDrawing.Geometry>
+                        </GeometryDrawing>
+                    </DrawingGroup>
+                </DrawingBrush.Drawing>
+            </DrawingBrush>
+        </Border.Background>
 
-       <Border Grid.Row="1">
-         <Border.Background>
-           <DrawingBrush TileMode="Tile"
-                         DestinationRect="0,0,80,46"
-                         Stretch="None">
-             <DrawingBrush.Drawing>
-               <DrawingGroup>
-                 <GeometryDrawing>
-                   <GeometryDrawing.Pen>
-                     <Pen Brush="#2B364A" Thickness="1" />
-                   </GeometryDrawing.Pen>
-                   <GeometryDrawing.Geometry>
-                     <GeometryGroup>
-                       <LineGeometry StartPoint="40,0" EndPoint="80,23" />
-                       <LineGeometry StartPoint="0,23" EndPoint="40,0" />
-                       <LineGeometry StartPoint="0,23" EndPoint="40,46" />
-                       <LineGeometry StartPoint="40,46" EndPoint="80,23" />
-                     </GeometryGroup>
-                   </GeometryDrawing.Geometry>
-                 </GeometryDrawing>
-               </DrawingGroup>
-             </DrawingBrush.Drawing>
-           </DrawingBrush>
-         </Border.Background>
+        <ScrollViewer HorizontalScrollBarVisibility="Auto"
+                      VerticalScrollBarVisibility="Auto">
+            <Grid Width="{Binding CanvasWidth}" Height="{Binding CanvasHeight}">
 
-         <ScrollViewer HorizontalScrollBarVisibility="Auto"
-                       VerticalScrollBarVisibility="Auto">
-           <Grid Width="{Binding CanvasWidth}" Height="{Binding CanvasHeight}">
+                <!-- Connector lines (behind nodes) -->
+                <ItemsControl ItemsSource="{Binding Connectors}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <Canvas/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="vm:ConnectorDisplay">
+                            <Line StartPoint="{Binding StartPoint}"
+                                  EndPoint="{Binding EndPoint}"
+                                  Stroke="#C6F36E" StrokeThickness="1"
+                                  Opacity="0.5"/>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
 
-             <!-- Connector lines (behind nodes) -->
-             <ItemsControl ItemsSource="{Binding Connectors}">
-               <ItemsControl.ItemsPanel>
-                 <ItemsPanelTemplate>
-                   <Canvas />
-                 </ItemsPanelTemplate>
-               </ItemsControl.ItemsPanel>
-               <ItemsControl.ItemTemplate>
-                 <DataTemplate x:DataType="vm:ConnectorDisplay">
-                   <Line StartPoint="{Binding StartPoint}"
-                         EndPoint="{Binding EndPoint}"
-                         Stroke="#C6F36E" StrokeThickness="2" />
-                 </DataTemplate>
-               </ItemsControl.ItemTemplate>
-             </ItemsControl>
+                <!-- Nodes -->
+                <ItemsControl ItemsSource="{Binding Nodes}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <Canvas/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemContainerTheme>
+                        <ControlTheme TargetType="ContentPresenter" x:DataType="vm:VisualizationNodeDisplay">
+                            <Setter Property="Canvas.Left" Value="{Binding X}"/>
+                            <Setter Property="Canvas.Top" Value="{Binding Y}"/>
+                            <Setter Property="ZIndex" Value="{Binding ZIndex}"/>
+                        </ControlTheme>
+                    </ItemsControl.ItemContainerTheme>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="vm:VisualizationNodeDisplay">
+                            <Border Background="#0D1117"
+                                    BorderBrush="#2A2E39"
+                                    BorderThickness="1"
+                                    CornerRadius="0"
+                                    Width="260">
+                                <StackPanel>
+                                    <!-- Node header -->
+                                    <Border Background="#090E18" BorderBrush="#2A2E39" BorderThickness="0,0,0,1" Padding="10,7">
+                                        <TextBlock Text="{Binding Name}"
+                                                   Foreground="#C6F36E"
+                                                   FontSize="10"
+                                                   FontWeight="Bold"/>
+                                    </Border>
+                                    <!-- Node body -->
+                                    <Border Padding="10,8">
+                                    <StackPanel Spacing="4">
+                                        <TextBlock Text="{Binding FunctionName}"
+                                                   Foreground="#6B7280"
+                                                   FontSize="10"
+                                                   FontWeight="SemiBold"/>
+                                        <TextBlock Text="{Binding Description}"
+                                                   Foreground="#9FB0D8"
+                                                   FontSize="11"
+                                                   TextWrapping="Wrap"/>
+                                        <Expander Header="PARAMETERS"
+                                                  IsExpanded="{Binding IsExpanded, Mode=TwoWay}"
+                                                  Foreground="#6B7280"
+                                                  FontSize="10"
+                                                  FontWeight="SemiBold"
+                                                  Margin="0,4,0,0">
+                                            <ItemsControl ItemsSource="{Binding Parameters}">
+                                                <ItemsControl.ItemTemplate>
+                                                    <DataTemplate x:DataType="vm:VisualizationNodeParameterDisplay">
+                                                        <Border BorderBrush="#1E2639" BorderThickness="0,0,0,1" Padding="0,6,0,6">
+                                                            <StackPanel Spacing="2">
+                                                                <TextBlock Text="{Binding Name}"
+                                                                           FontSize="10"
+                                                                           FontWeight="SemiBold"
+                                                                           Foreground="#6B7280"/>
+                                                                <TextBlock Text="{Binding Value}"
+                                                                           FontSize="11"
+                                                                           Foreground="#C6F36E"/>
+                                                                <TextBlock Text="{Binding Description}"
+                                                                           FontSize="11"
+                                                                           Foreground="#9FB0D8"
+                                                                           TextWrapping="Wrap"/>
+                                                            </StackPanel>
+                                                        </Border>
+                                                    </DataTemplate>
+                                                </ItemsControl.ItemTemplate>
+                                            </ItemsControl>
+                                        </Expander>
+                                    </StackPanel>
+                                    </Border>
+                                </StackPanel>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
 
-             <!-- Nodes (in front) -->
-             <ItemsControl ItemsSource="{Binding Nodes}">
-               <ItemsControl.ItemsPanel>
-                 <ItemsPanelTemplate>
-                   <Canvas />
-                 </ItemsPanelTemplate>
-               </ItemsControl.ItemsPanel>
-               <ItemsControl.ItemContainerTheme>
-                 <ControlTheme TargetType="ContentPresenter" x:DataType="vm:VisualizationNodeDisplay">
-                   <Setter Property="Canvas.Left" Value="{Binding X}" />
-                   <Setter Property="Canvas.Top" Value="{Binding Y}" />
-                   <Setter Property="ZIndex"      Value="{Binding ZIndex}" />
-                 </ControlTheme>
-               </ItemsControl.ItemContainerTheme>
-               <ItemsControl.ItemTemplate>
-                 <DataTemplate x:DataType="vm:VisualizationNodeDisplay">
-                   <Border Background="#1F2636" CornerRadius="8" Padding="12" Width="260">
-                     <StackPanel Spacing="6">
-                       <TextBlock Text="{Binding Name}" Foreground="#C6F36E" FontWeight="Bold" />
-                       <TextBlock Text="{Binding FunctionName}" Foreground="#9FB0D8" />
-                       <TextBlock Text="{Binding Description}" Foreground="#9FB0D8" TextWrapping="Wrap" />
-                       <Expander Header="Parameters" IsExpanded="{Binding IsExpanded, Mode=TwoWay}">
-                         <ItemsControl ItemsSource="{Binding Parameters}">
-                           <ItemsControl.ItemTemplate>
-                             <DataTemplate x:DataType="vm:VisualizationNodeParameterDisplay">
-                               <StackPanel Spacing="2" Margin="0,6,0,0">
-                                 <TextBlock Text="{Binding Name}" FontWeight="SemiBold" />
-                                 <TextBlock Text="{Binding Value}" Foreground="#C6F36E" />
-                                 <TextBlock Text="{Binding Description}" Foreground="#9FB0D8" TextWrapping="Wrap" />
-                               </StackPanel>
-                             </DataTemplate>
-                           </ItemsControl.ItemTemplate>
-                         </ItemsControl>
-                       </Expander>
-                     </StackPanel>
-                   </Border>
-                 </DataTemplate>
-               </ItemsControl.ItemTemplate>
-             </ItemsControl>
-
-           </Grid>
-         </ScrollViewer>
-       </Border>
-     </Grid>
-   </Border>
+            </Grid>
+        </ScrollViewer>
+    </Border>
 
 </UserControl>

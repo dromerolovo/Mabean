@@ -1,143 +1,165 @@
 <UserControl xmlns="https://github.com/avaloniaui"
-			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-			 xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-			 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-			 xmlns:shadui="clr-namespace:ShadUI;assembly=ShadUI"
-			 xmlns:vm="clr-namespace:Mabean.ViewModels"
-			 xmlns:models="clr-namespace:Mabean.Models"
-			 mc:Ignorable="d"
-			 d:DesignWidth="800"
-			 d:DesignHeight="450"
-			 x:Class="Mabean.Views.EventsView"
-			 x:DataType="vm:EventsViewModel"
-			 VerticalAlignment="Stretch"
-			 HorizontalAlignment="Stretch">
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:shadui="clr-namespace:ShadUI;assembly=ShadUI"
+             xmlns:vm="clr-namespace:Mabean.ViewModels"
+             xmlns:models="clr-namespace:Mabean.Models"
+             mc:Ignorable="d"
+             d:DesignWidth="800"
+             d:DesignHeight="450"
+             x:Class="Mabean.Views.EventsView"
+             x:DataType="vm:EventsViewModel"
+             VerticalAlignment="Stretch"
+             HorizontalAlignment="Stretch">
 
-	<Border Padding="20">
-		<Grid RowDefinitions="Auto,Auto,Auto,*,Auto,Auto">
+    <UserControl.Styles>
+        <Style Selector="DataGrid">
+            <Setter Property="Background" Value="#070C14"/>
+            <Setter Property="RowBackground" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="Foreground" Value="#9FB0D8"/>
+            <Setter Property="GridLinesVisibility" Value="Horizontal"/>
+            <Setter Property="HorizontalGridLinesBrush" Value="#1E2639"/>
+            <Setter Property="VerticalGridLinesBrush" Value="Transparent"/>
+            <Setter Property="RowHeight" Value="36"/>
+        </Style>
+        <Style Selector="DataGridColumnHeader">
+            <Setter Property="Background" Value="#090E18"/>
+            <Setter Property="Foreground" Value="#6B7280"/>
+            <Setter Property="FontSize" Value="10"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Height" Value="32"/>
+            <Setter Property="Padding" Value="12,0"/>
+            <Setter Property="BorderBrush" Value="#2A2E39"/>
+            <Setter Property="BorderThickness" Value="0,0,0,1"/>
+        </Style>
+        <Style Selector="DataGridRow:selected">
+            <Setter Property="Background" Value="#111D30"/>
+        </Style>
+    </UserControl.Styles>
 
-			<TextBlock Grid.Row="0"
-					   Classes="h4"
-					   Text="Security Events" />
+    <Grid Background="#070C14" RowDefinitions="*,Auto">
 
-			<Border Grid.Row="1" Height="12"/>
+        <!-- Events table fills available space -->
+        <DataGrid Grid.Row="0"
+                  ItemsSource="{Binding SecurityEvents}"
+                  IsReadOnly="True"
+                  SelectionMode="Single"
+                  HeadersVisibility="Column"
+                  VerticalScrollBarVisibility="Auto"
+                  HorizontalScrollBarVisibility="Auto">
 
-			<Grid Grid.Row="2"
-				  ColumnDefinitions="*,Auto"
-				  Margin="0,0,0,16">
-				<StackPanel Grid.Column="1"
-							Orientation="Horizontal"
-							Spacing="8">
-					<Button Classes="Outline"
-							Command="{Binding AnalyzeSelectedCommand}"
-							Content="Analyze Selected"/>
-					<Button Classes="Outline"
-							Command="{Binding ClearEventsCommand}"
-							Content="Clear Events"/>
-				</StackPanel>
-			</Grid>
+            <DataGrid.Columns>
 
-			<Border Grid.Row="3"
-					MaxHeight="420"
-					ClipToBounds="True">
+                <DataGridTextColumn Width="90"
+                                    Binding="{Binding RecordId}"
+                                    Header="RECORD ID"/>
 
-				<DataGrid
-				Grid.Row="3"
-				ItemsSource="{Binding SecurityEvents}"
-				IsReadOnly="True"
-				SelectionMode="Single"
-				RowHeight="44"
-				HeadersVisibility="Column"
-				VerticalScrollBarVisibility="Auto"
-				HorizontalScrollBarVisibility="Auto">
+                <DataGridTemplateColumn Width="160"
+                                        Header="TIMESTAMP"
+                                        SortMemberPath="TimeCreated">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate DataType="models:SecurityEvent">
+                            <TextBlock Margin="12,0"
+                                       VerticalAlignment="Center"
+                                       FontSize="11"
+                                       Foreground="#9FB0D8"
+                                       Text="{Binding TimeCreated, StringFormat={}{0:yyyy-MM-dd HH:mm:ss}}"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
 
-					<DataGrid.Columns>
+                <DataGridTextColumn Width="70"
+                                    Binding="{Binding EventId}"
+                                    Header="EVENT ID"/>
 
-						<DataGridTextColumn Width="100"
-											Binding="{Binding RecordId}"
-											Header="Record ID"/>
+                <DataGridTextColumn Width="190"
+                                    Binding="{Binding Source}"
+                                    Header="SOURCE"/>
 
-						<DataGridTemplateColumn Width="170"
-												Header="Time Created"
-												SortMemberPath="TimeCreated">
-							<DataGridTemplateColumn.CellTemplate>
-								<DataTemplate DataType="models:SecurityEvent">
-									<TextBlock Margin="12,0"
-											   VerticalAlignment="Center"
-											   Text="{Binding TimeCreated,
-											   StringFormat={}{0:yyyy-MM-dd HH:mm:ss}}"/>
-								</DataTemplate>
-							</DataGridTemplateColumn.CellTemplate>
-						</DataGridTemplateColumn>
+                <DataGridTextColumn Width="140"
+                                    Binding="{Binding TaskCategory}"
+                                    Header="CATEGORY"/>
 
-						<DataGridTextColumn Width="80"
-											Binding="{Binding EventId}"
-											Header="Event ID"/>
+                <DataGridTemplateColumn Width="*"
+                                        CanUserSort="False"
+                                        Header="MESSAGE">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate DataType="models:SecurityEvent">
+                            <TextBlock Margin="12,0"
+                                       VerticalAlignment="Center"
+                                       FontSize="11"
+                                       Foreground="#9FB0D8"
+                                       Text="{Binding Message}"
+                                       TextTrimming="CharacterEllipsis"
+                                       ToolTip.Tip="{Binding Message}"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
 
-						<DataGridTextColumn Width="200"
-											Binding="{Binding Source}"
-											Header="Source"/>
+                <DataGridTemplateColumn Width="44"
+                                        CanUserResize="False"
+                                        CanUserSort="False">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate DataType="models:SecurityEvent">
+                            <CheckBox HorizontalAlignment="Center"
+                                      VerticalAlignment="Center"
+                                      IsChecked="{ReflectionBinding IsSelected}"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
 
-						<DataGridTextColumn Width="150"
-											Binding="{Binding TaskCategory}"
-											Header="Category"/>
+            </DataGrid.Columns>
+        </DataGrid>
 
-						<DataGridTemplateColumn Width="*"
-												CanUserSort="False"
-												Header="Message">
-							<DataGridTemplateColumn.CellTemplate>
-								<DataTemplate DataType="models:SecurityEvent">
-									<TextBlock Margin="12,0"
-											   VerticalAlignment="Center"
-											   Text="{Binding Message}"
-											   TextTrimming="CharacterEllipsis"
-											   ToolTip.Tip="{Binding Message}"/>
-								</DataTemplate>
-							</DataGridTemplateColumn.CellTemplate>
-						</DataGridTemplateColumn>
+        <!-- Analysis panel -->
+        <Border Grid.Row="1"
+                Background="#090E18"
+                BorderBrush="#2A2E39"
+                BorderThickness="0,1,0,0"
+                MaxHeight="160">
+            <Grid RowDefinitions="Auto,*">
 
-						<DataGridTemplateColumn Width="48"
-												CanUserResize="False"
-												CanUserSort="False">
-							<DataGridTemplateColumn.CellTemplate>
-								<DataTemplate DataType="models:SecurityEvent">
-									<CheckBox HorizontalAlignment="Center"
-											  VerticalAlignment="Center"
-											  IsChecked="{ReflectionBinding IsSelected}"/>
-								</DataTemplate>
-							</DataGridTemplateColumn.CellTemplate>
-						</DataGridTemplateColumn>
+                <!-- Analysis header -->
+                <Border Grid.Row="0" BorderBrush="#2A2E39" BorderThickness="0,0,0,1" Padding="14,8">
+                    <Grid ColumnDefinitions="Auto,*,Auto">
+                        <TextBlock Text="ANALYSIS" FontSize="10" FontWeight="SemiBold" Foreground="#6B7280" VerticalAlignment="Center"/>
+                        <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="6">
+                            <Border Background="#161D2C" BorderBrush="#2A2E39" BorderThickness="1"
+                                    Padding="7,2" VerticalAlignment="Center">
+                                <StackPanel Orientation="Horizontal" Spacing="4">
+                                    <TextBlock Text="{Binding SecurityEvents.Count}"
+                                               FontSize="10" Foreground="#9FB0D8"/>
+                                    <TextBlock Text="EVENTS" FontSize="10" Foreground="#6B7280"/>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+                    </Grid>
+                </Border>
 
-					</DataGrid.Columns>
-				</DataGrid>
-			</Border>
+                <!-- Analysis content -->
+                <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                    <Border Padding="14,10">
+                        <StackPanel Spacing="6">
+                            <Grid ColumnDefinitions="Auto,*">
+                                <TextBlock Text="SUSPICIOUSNESS" FontSize="10" FontWeight="SemiBold" Foreground="#6B7280"
+                                           VerticalAlignment="Center" Margin="0,0,10,0"/>
+                                <TextBlock Grid.Column="1" Text="{Binding Suspiciousness}"
+                                           FontSize="11" Foreground="#C6F36E"/>
+                            </Grid>
+                            <TextBlock Text="EXPLANATION" FontSize="10" FontWeight="SemiBold" Foreground="#6B7280" Margin="0,2,0,0"/>
+                            <TextBlock Text="{Binding Explanation}"
+                                       FontSize="11" Foreground="#9FB0D8"
+                                       TextWrapping="Wrap"/>
+                        </StackPanel>
+                    </Border>
+                </ScrollViewer>
 
-			<TextBlock Grid.Row="4"
-					   Margin="0,16,0,0"
-					   Classes="Small Muted">
-				<Run Text="{Binding SecurityEvents.Count}"/>
-				<Run Text=" event(s) captured."/>
-			</TextBlock>
+            </Grid>
+        </Border>
 
-			<StackPanel Grid.Row="5"
-						Margin="0,20,0,0"
-						Spacing="8">
-				<TextBlock Classes="h4"
-						   Text="Analysis"/>
-				<StackPanel Orientation="Horizontal" Spacing="4">
-					<TextBlock Classes="Small" FontWeight="Bold"
-							   Text="Suspiciousness:"/>
-					<TextBlock Classes="Small"
-							   Text="{Binding Suspiciousness}"/>
-				</StackPanel>
-				<TextBlock Classes="Small" FontWeight="Bold"
-						   Text="Explanation:"/>
-				<TextBlock Classes="Small"
-						   Text="{Binding Explanation}"
-						   TextWrapping="Wrap"/>
-			</StackPanel>
+    </Grid>
 
-		</Grid>
-	</Border>
 </UserControl>
-

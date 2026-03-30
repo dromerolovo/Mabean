@@ -1,23 +1,27 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
 namespace Mabean.ViewModels;
 
 public partial class MainWindowViewModel : ViewModelBase
 {
-    [ObservableProperty]
-    private ViewModelBase _currentPage;
-    public HomeViewModel HomeViewModel { get; } = new();
-    public KeysManagmentViewModel KeysManagmentViewModel { get; } 
-    public PayloadManagerViewModel PayloadManagerViewModel { get; } 
+    public KeysManagmentViewModel KeysManagmentViewModel { get; }
+    public PayloadManagerViewModel PayloadManagerViewModel { get; }
     public BehaviorSimulationViewModel BehaviorSimulationViewModel { get; }
     public EventsViewModel EventsViewModel { get; }
-
-    public ProcessFinderViewModel ProcessFinderViewModel { get; }
     public BehaviorVisualizationViewModel BehaviorVisualizationViewModel { get; }
     public BehaviorChainViewModel BehaviorChainViewModel { get; }
 
-    public MainWindowViewModel(KeysManagmentViewModel keysManagmentViewModel,
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ShowChain), nameof(ShowSimulate), nameof(ShowPayloads))]
+    private int _leftTab = 0;
+
+    public bool ShowChain => LeftTab == 0;
+    public bool ShowSimulate => LeftTab == 1;
+    public bool ShowPayloads => LeftTab == 2;
+
+    public MainWindowViewModel(
+        KeysManagmentViewModel keysManagmentViewModel,
         PayloadManagerViewModel payloadManagerViewModel,
         BehaviorSimulationViewModel behaviorSimulationViewModel,
         EventsViewModel eventsViewModel,
@@ -28,35 +32,12 @@ public partial class MainWindowViewModel : ViewModelBase
         KeysManagmentViewModel = keysManagmentViewModel;
         PayloadManagerViewModel = payloadManagerViewModel;
         BehaviorSimulationViewModel = behaviorSimulationViewModel;
-        _currentPage = HomeViewModel;
         EventsViewModel = eventsViewModel;
-        ProcessFinderViewModel = processFinderViewModel;
         BehaviorVisualizationViewModel = behaviorVisualizationViewModel;
         BehaviorChainViewModel = behaviorChainViewModel;
     }
-    public string Greeting { get; } = "Welcome to Avalonia!";
 
-    private bool _isSidebarExpanded = true;
-    public bool IsSidebarExpanded
-    {
-        get => _isSidebarExpanded;
-        set => SetProperty(ref _isSidebarExpanded, value);
-    }
-
-    [RelayCommand]
-    public void NavigateTo(string page)
-    {
-        CurrentPage = page switch
-        {
-            "Home" => HomeViewModel,
-            "KeysManagment" => KeysManagmentViewModel,
-            "PayloadManager" => PayloadManagerViewModel,
-            "BehaviorSimulation" => BehaviorSimulationViewModel,
-            "EventsView" => EventsViewModel,
-            "ProcessFinderView" => ProcessFinderViewModel,
-            "BehaviorVisualization" => BehaviorVisualizationViewModel,
-            "BehaviorChain" => BehaviorChainViewModel,
-            _ => CurrentPage
-        };
-    }
+    [RelayCommand] void SelectChain() => LeftTab = 0;
+    [RelayCommand] void SelectSimulate() => LeftTab = 1;
+    [RelayCommand] void SelectPayloads() => LeftTab = 2;
 }

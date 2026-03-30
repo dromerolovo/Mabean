@@ -1,66 +1,117 @@
 <UserControl xmlns="https://github.com/avaloniaui"
-			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-			 xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-			 xmlns:local="using:Mabean.Views"
-			 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-			 mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-			 xmlns:shadui="clr-namespace:ShadUI;assembly=ShadUI"
-			 x:Class="Mabean.Views.BehaviorSimulationView"
-			 xmlns:vm="using:Mabean.ViewModels"
-			 x:DataType="vm:BehaviorSimulationViewModel">
-	<Border Padding="20">
-		<StackPanel HorizontalAlignment="Left" VerticalAlignment="Top">
-			<TextBlock
-			Classes="h4"
-			Text="Simulate a behavior"
-			TextWrapping="Wrap" />
-			<Border Height="12"/>
-			<TextBlock
-			FontSize="14"
-			Text="Choose a type:"
-			TextWrapping="Wrap" />
-			<Border Height="12"/>
-			<ComboBox Width="255" SelectedIndex="0"
-					  ItemsSource="{Binding Behaviors}"
-					  SelectedItem="{Binding SelectedBehavior}">
-			</ComboBox>
-			<Border Height="12"/>
-			<StackPanel IsVisible="{Binding ShowPayloadField}">
-				<TextBlock
-				FontSize="14"
-				Text="Choose a payload:"
-				TextWrapping="Wrap" />
-				<Border Height="12"/>
-				<ComboBox Width="255" SelectedIndex="0"
-						  ItemsSource="{Binding Payloads}"
-						  SelectedItem="{Binding SelectedPayload}">
-				</ComboBox>
-				<Border Height="12"/>
-			</StackPanel>
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="using:Mabean.Views"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="1200" d:DesignHeight="700"
+             xmlns:shadui="clr-namespace:ShadUI;assembly=ShadUI"
+             x:Class="Mabean.Views.BehaviorSimulationView"
+             xmlns:vm="using:Mabean.ViewModels"
+             x:DataType="vm:BehaviorSimulationViewModel">
 
-			<StackPanel IsVisible="{Binding ShowPuidField}">
-				<TextBox
-				shadui:ControlAssist.Label="Puid:"
-				Text="{Binding Puid}"
-				HorizontalAlignment="Left"
-				Watermark="Process ID" />
-				<Border Height="12"/>
-			</StackPanel>
-			<StackPanel IsVisible="{Binding ShowProgramNameField}">
-				<TextBox
-				shadui:ControlAssist.Label="Program name:"
-				Text="{Binding ProgramName}"
-				HorizontalAlignment="Left"
-				Watermark="Program name" />
-				<Border Height="12"/>
-			</StackPanel>
+    <UserControl.Styles>
+        <Style Selector="TextBox">
+            <Setter Property="CornerRadius" Value="0"/>
+            <Setter Property="Background" Value="#070C14"/>
+            <Setter Property="BorderBrush" Value="#2A2E39"/>
+            <Setter Property="Foreground" Value="#D1D4DC"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="Height" Value="28"/>
+            <Setter Property="Padding" Value="8,0"/>
+            <Setter Property="MinHeight" Value="0"/>
+        </Style>
+        <Style Selector="ComboBox">
+            <Setter Property="CornerRadius" Value="0"/>
+            <Setter Property="Background" Value="#070C14"/>
+            <Setter Property="BorderBrush" Value="#2A2E39"/>
+            <Setter Property="Foreground" Value="#D1D4DC"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="Height" Value="28"/>
+            <Setter Property="MinHeight" Value="0"/>
+            <Setter Property="Padding" Value="8,0"/>
+        </Style>
+        <Style Selector="Button.execBtn">
+            <Setter Property="Background" Value="#C6F36E"/>
+            <Setter Property="Foreground" Value="#070C14"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="CornerRadius" Value="0"/>
+            <Setter Property="Padding" Value="24,0"/>
+            <Setter Property="Height" Value="28"/>
+            <Setter Property="FontSize" Value="10"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+        </Style>
+        <Style Selector="Button.execBtn:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="#D4F87A"/>
+        </Style>
+    </UserControl.Styles>
 
-			<Button
-			Command="{Binding ExecuteBehaviorCommand}"
-			Classes="Primary"
-			Content="Execute" />
-		</StackPanel>
-	</Border>
+    <Grid Background="#070C14" RowDefinitions="*">
 
+        <!-- Configuration panel -->
+        <Border>
+        <Grid RowDefinitions="*,Auto">
+
+            <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto">
+                <StackPanel>
+
+                    <!-- Section header -->
+                    <Border Background="#090E18" BorderBrush="#2A2E39" BorderThickness="0,0,0,1" Padding="14,9">
+                        <TextBlock Text="CONFIGURATION" FontSize="10" FontWeight="SemiBold" Foreground="#6B7280"/>
+                    </Border>
+
+                    <!-- Fields -->
+                    <Border Padding="14,12,14,12">
+                    <StackPanel Spacing="10">
+
+                        <Grid ColumnDefinitions="110,*">
+                            <TextBlock Text="BEHAVIOR TYPE" FontSize="10" FontWeight="SemiBold" Foreground="#6B7280" VerticalAlignment="Center"/>
+                            <ComboBox Grid.Column="1"
+                                      ItemsSource="{Binding Behaviors}"
+                                      SelectedItem="{Binding SelectedBehavior}"
+                                      HorizontalAlignment="Stretch"/>
+                        </Grid>
+
+                        <Border Height="1" Background="#1E2639"/>
+
+                        <Grid ColumnDefinitions="110,*" IsVisible="{Binding ShowPayloadField}">
+                            <TextBlock Text="PAYLOAD" FontSize="10" FontWeight="SemiBold" Foreground="#6B7280" VerticalAlignment="Center"/>
+                            <ComboBox Grid.Column="1"
+                                      ItemsSource="{Binding Payloads}"
+                                      SelectedItem="{Binding SelectedPayload}"
+                                      HorizontalAlignment="Stretch"/>
+                        </Grid>
+
+                        <Grid ColumnDefinitions="110,*" IsVisible="{Binding ShowPuidField}">
+                            <TextBlock Text="TARGET PUID" FontSize="10" FontWeight="SemiBold" Foreground="#6B7280" VerticalAlignment="Center"/>
+                            <TextBox Grid.Column="1" Text="{Binding Puid}" Watermark="Process ID"/>
+                        </Grid>
+
+                        <Grid ColumnDefinitions="110,*" IsVisible="{Binding ShowProgramNameField}">
+                            <TextBlock Text="PROGRAM NAME" FontSize="10" FontWeight="SemiBold" Foreground="#6B7280" VerticalAlignment="Center"/>
+                            <TextBox Grid.Column="1" Text="{Binding ProgramName}" Watermark="Program name"/>
+                        </Grid>
+
+                    </StackPanel>
+                    </Border>
+                </StackPanel>
+            </ScrollViewer>
+
+            <!-- Execute bar -->
+            <Border Grid.Row="1"
+                    Background="#090E18"
+                    BorderBrush="#2A2E39"
+                    BorderThickness="0,1,0,0"
+                    Padding="14,10">
+                <Button Classes="execBtn"
+                        Content="EXECUTE"
+                        HorizontalAlignment="Right"
+                        Command="{Binding ExecuteBehaviorCommand}"/>
+            </Border>
+
+        </Grid>
+        </Border>
+
+
+    </Grid>
 
 </UserControl>

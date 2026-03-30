@@ -1,58 +1,132 @@
 <UserControl xmlns="https://github.com/avaloniaui"
-			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-			 xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-			 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-			 xmlns:shadui="clr-namespace:ShadUI;assembly=ShadUI"
-			 mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-			 x:Class="Mabean.Views.PayloadManagerView"
-			 xmlns:vm="using:Mabean.ViewModels"
-			 x:DataType="vm:PayloadManagerViewModel">
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:shadui="clr-namespace:ShadUI;assembly=ShadUI"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="Mabean.Views.PayloadManagerView"
+             xmlns:vm="using:Mabean.ViewModels"
+             x:DataType="vm:PayloadManagerViewModel">
 
-	<Border Padding="20">
-		<StackPanel HorizontalAlignment="Left" VerticalAlignment="Top">
-			<TextBlock
-			Classes="h4"
-			Text="Create payload"
-			TextWrapping="Wrap" />
-			<Border Height="12"/>
-			<TextBox
-			shadui:ControlAssist.Label="Enter command to generate payload"
-			Width="400"
-			Text="{Binding PayloadCommand}"
-			shadui:ControlAssist.Height="100"
-			AcceptsReturn="True"
-			Watermark="E.g msfvenom -p windows/x64/exec CMD=calc.exe..." />
-			<Border Height="12"/>
-			<TextBox
-			shadui:ControlAssist.Label="Payload name"
-			HorizontalAlignment="Left"
-			Text="{Binding PayloadName}"
-			Width="225"
-			Watermark="Name for the payload" />
-			<Border Height="12"/>
-			<Button
-			Width="120"
-			HorizontalAlignment="Left"
-			Classes="Primary"
-			Command="{Binding AddPayloadCommand}"
-			Content="Create" />
-			<Border Height="12"/>
-			<Separator Height="1" Background="{DynamicResource BorderBrush}" Margin="0,8" />
-			<Border Height="12"/>
-			<TextBlock
-			Classes="h4"
-			Text="Created payloads:"
-			TextWrapping="Wrap" />
-			<TextBlock
-			Text="There are no payloads"
-			IsVisible="{Binding HasNoPayloads}"
-			Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
-			<Border Height="12"/>
-			<ListBox
-			IsVisible="{Binding !HasNoPayloads}"
-			ItemsSource="{Binding Payloads}" />
-	</StackPanel>
+    <UserControl.Styles>
+        <Style Selector="TextBox">
+            <Setter Property="CornerRadius" Value="0"/>
+            <Setter Property="Background" Value="#070C14"/>
+            <Setter Property="BorderBrush" Value="#2A2E39"/>
+            <Setter Property="Foreground" Value="#D1D4DC"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="Height" Value="28"/>
+            <Setter Property="Padding" Value="8,0"/>
+            <Setter Property="MinHeight" Value="0"/>
+        </Style>
+        <Style Selector="Button.createBtn">
+            <Setter Property="Background" Value="#C6F36E"/>
+            <Setter Property="Foreground" Value="#070C14"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="CornerRadius" Value="0"/>
+            <Setter Property="Padding" Value="20,0"/>
+            <Setter Property="Height" Value="28"/>
+            <Setter Property="FontSize" Value="10"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+        </Style>
+        <Style Selector="Button.createBtn:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="#D4F87A"/>
+        </Style>
+        <Style Selector="ListBoxItem">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderBrush" Value="#1E2639"/>
+            <Setter Property="BorderThickness" Value="0,0,0,1"/>
+            <Setter Property="Padding" Value="14,8"/>
+            <Setter Property="Foreground" Value="#9FB0D8"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="CornerRadius" Value="0"/>
+        </Style>
+        <Style Selector="ListBoxItem:selected /template/ ContentPresenter">
+            <Setter Property="Background" Value="#111D30"/>
+        </Style>
+        <Style Selector="ListBoxItem:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="#0D1525"/>
+        </Style>
+    </UserControl.Styles>
 
-	</Border>
+    <Grid Background="#070C14" RowDefinitions="Auto,*">
+
+        <!-- Create form -->
+        <Border Grid.Row="0" Background="#0D1117" BorderBrush="#2A2E39" BorderThickness="0,0,0,1">
+            <StackPanel>
+
+                <!-- Form header -->
+                <Border Background="#090E18" BorderBrush="#2A2E39" BorderThickness="0,0,0,1" Padding="14,9">
+                    <TextBlock Text="CREATE PAYLOAD" FontSize="10" FontWeight="SemiBold" Foreground="#6B7280"/>
+                </Border>
+
+                <!-- Form fields -->
+                <Border Padding="14,12,14,14">
+                <StackPanel Spacing="10">
+
+                    <Grid ColumnDefinitions="110,*">
+                        <TextBlock Text="COMMAND" FontSize="10" FontWeight="SemiBold" Foreground="#6B7280" VerticalAlignment="Top" Margin="0,6,0,0"/>
+                        <TextBox Grid.Column="1"
+                                 Text="{Binding PayloadCommand}"
+                                 Height="72"
+                                 AcceptsReturn="True"
+                                 Watermark="E.g. msfvenom -p windows/x64/exec CMD=calc.exe..."
+                                 TextWrapping="Wrap"
+                                 VerticalContentAlignment="Top"
+                                 Padding="8,6"/>
+                    </Grid>
+
+                    <Grid ColumnDefinitions="110,*">
+                        <TextBlock Text="PAYLOAD NAME" FontSize="10" FontWeight="SemiBold" Foreground="#6B7280" VerticalAlignment="Center"/>
+                        <TextBox Grid.Column="1" Text="{Binding PayloadName}" Watermark="Identifier"/>
+                    </Grid>
+
+                    <Button Classes="createBtn"
+                            HorizontalAlignment="Right"
+                            Command="{Binding AddPayloadCommand}"
+                            Content="CREATE"/>
+
+                </StackPanel>
+                </Border>
+            </StackPanel>
+        </Border>
+
+        <!-- Payloads list -->
+        <Grid Grid.Row="1" RowDefinitions="Auto,*">
+
+            <Border Grid.Row="0" Background="#090E18" BorderBrush="#2A2E39" BorderThickness="0,0,0,1" Padding="14,9">
+                <Grid ColumnDefinitions="*,Auto">
+                    <TextBlock Text="PAYLOADS" FontSize="10" FontWeight="SemiBold" Foreground="#6B7280" VerticalAlignment="Center"/>
+                    <Border Grid.Column="1"
+                            Background="#161D2C"
+                            BorderBrush="#2A2E39"
+                            BorderThickness="1"
+                            Padding="7,2"
+                            VerticalAlignment="Center">
+                        <TextBlock Text="{Binding Payloads.Count}"
+                                   FontSize="10" Foreground="#9FB0D8"/>
+                    </Border>
+                </Grid>
+            </Border>
+
+            <Border Grid.Row="1">
+                <Panel>
+                    <TextBlock Text="NO PAYLOADS"
+                               IsVisible="{Binding HasNoPayloads}"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"
+                               FontSize="10"
+                               FontWeight="SemiBold"
+                               Foreground="#2A2E39"/>
+                    <ListBox IsVisible="{Binding !HasNoPayloads}"
+                             ItemsSource="{Binding Payloads}"
+                             Background="#070C14"
+                             BorderThickness="0"/>
+                </Panel>
+            </Border>
+
+        </Grid>
+
+    </Grid>
 
 </UserControl>

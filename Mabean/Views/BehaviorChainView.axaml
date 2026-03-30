@@ -10,117 +10,182 @@
              x:Class="Mabean.Views.BehaviorChainView"
              x:DataType="vm:BehaviorChainViewModel">
 
-    <Border Padding="20">
-        <Grid RowDefinitions="Auto,*,Auto" RowSpacing="16">
+    <UserControl.Styles>
+        <Style Selector="TextBox">
+            <Setter Property="CornerRadius" Value="0"/>
+            <Setter Property="Background" Value="#070C14"/>
+            <Setter Property="BorderBrush" Value="#2A2E39"/>
+            <Setter Property="Foreground" Value="#D1D4DC"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="Height" Value="28"/>
+            <Setter Property="Padding" Value="8,0"/>
+            <Setter Property="MinHeight" Value="0"/>
+        </Style>
+        <Style Selector="ComboBox">
+            <Setter Property="CornerRadius" Value="0"/>
+            <Setter Property="Background" Value="#070C14"/>
+            <Setter Property="BorderBrush" Value="#2A2E39"/>
+            <Setter Property="Foreground" Value="#D1D4DC"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="Height" Value="28"/>
+            <Setter Property="MinHeight" Value="0"/>
+            <Setter Property="Padding" Value="8,0"/>
+        </Style>
+        <Style Selector="CheckBox">
+            <Setter Property="Foreground" Value="#6B7280"/>
+            <Setter Property="FontSize" Value="10"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+        </Style>
+        <Style Selector="Button.runBtn">
+            <Setter Property="Background" Value="#C6F36E"/>
+            <Setter Property="Foreground" Value="#070C14"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="CornerRadius" Value="0"/>
+            <Setter Property="Padding" Value="24,0"/>
+            <Setter Property="Height" Value="28"/>
+            <Setter Property="FontSize" Value="10"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+        </Style>
+        <Style Selector="Button.runBtn:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="#D4F87A"/>
+        </Style>
+    </UserControl.Styles>
 
-            <TextBlock Grid.Row="0" Classes="h4" Text="Behavior Chain" />
+    <Grid Background="#070C14" RowDefinitions="*,Auto">
 
-            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
-                <StackPanel HorizontalAlignment="Center" MaxWidth="520">
+        <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto">
+            <StackPanel Margin="20,20,20,12" Spacing="0" MaxWidth="460" HorizontalAlignment="Left">
 
-                    <Border Background="#1E1E1E" BorderBrush="#2A2A2A" BorderThickness="1" CornerRadius="12" Padding="16" Width="520">
-                        <StackPanel Spacing="10">
+                <!-- Phase 1: Privilege Escalation -->
+                <Border Background="#0D1117" BorderBrush="#2A2E39" BorderThickness="1">
+                    <StackPanel>
+                        <Border Background="#090E18" BorderBrush="#2A2E39" BorderThickness="0,0,0,1" Padding="14,9">
                             <Grid ColumnDefinitions="*,Auto">
-                                <StackPanel>
-                                    <TextBlock Text="Phase 1" Foreground="#6B7280" FontSize="11" />
-                                    <TextBlock Text="Privilege Escalation" FontWeight="SemiBold" />
+                                <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                                    <TextBlock Text="PHASE 01" FontSize="10" FontWeight="SemiBold" Foreground="#6B7280" VerticalAlignment="Center"/>
+                                    <Border Width="1" Height="12" Background="#2A2E39" VerticalAlignment="Center"/>
+                                    <TextBlock Text="PRIVILEGE ESCALATION" FontSize="10" FontWeight="SemiBold" Foreground="#9FB0D8" VerticalAlignment="Center"/>
                                 </StackPanel>
-                                <CheckBox Grid.Column="1" IsChecked="{Binding PrivEscEnabled}" Content="Enable" />
+                                <CheckBox Grid.Column="1" IsChecked="{Binding PrivEscEnabled}" Content="ENABLE"/>
                             </Grid>
-
-                            <StackPanel IsVisible="{Binding ShowPrivEscFields}" Spacing="8">
-                                <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-                                    <TextBlock Text="Behavior" Foreground="#9FB0D8" Width="100" VerticalAlignment="Center" />
-                                    <ComboBox Width="280"
+                        </Border>
+                        <Border IsVisible="{Binding ShowPrivEscFields}" Padding="14,10,14,12">
+                            <StackPanel Spacing="8">
+                                <Grid ColumnDefinitions="110,*" VerticalAlignment="Center">
+                                    <TextBlock Text="BEHAVIOR" FontSize="10" FontWeight="SemiBold" Foreground="#6B7280" VerticalAlignment="Center"/>
+                                    <ComboBox Grid.Column="1"
                                               ItemsSource="{Binding PrivEscBehaviors}"
-                                              SelectedItem="{Binding PrivEscBehavior}" />
-                                </StackPanel>
-                                <StackPanel IsVisible="{Binding ShowPrivEscPidField}" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-                                    <TextBlock Text="Target PID" Foreground="#9FB0D8" Width="100" VerticalAlignment="Center" />
-                                    <TextBox Width="280" Text="{Binding PrivEscTargetPid}" Watermark="Process ID" />
-                                </StackPanel>
+                                              SelectedItem="{Binding PrivEscBehavior}"
+                                              HorizontalAlignment="Stretch"/>
+                                </Grid>
+                                <Grid ColumnDefinitions="110,*" IsVisible="{Binding ShowPrivEscPidField}">
+                                    <TextBlock Text="TARGET PID" FontSize="10" FontWeight="SemiBold" Foreground="#6B7280" VerticalAlignment="Center"/>
+                                    <TextBox Grid.Column="1" Text="{Binding PrivEscTargetPid}" Watermark="Process ID"/>
+                                </Grid>
                             </StackPanel>
-                        </StackPanel>
-                    </Border>
+                        </Border>
+                    </StackPanel>
+                </Border>
 
-                    <Border Height="24" Width="2" Background="#2A2A2A" HorizontalAlignment="Center" />
+                <!-- Connector -->
+                <Border Height="16" Width="1" Background="#2A2E39" HorizontalAlignment="Left" Margin="14,0,0,0"/>
 
-                    <Border Background="#1E1E1E" BorderBrush="#2A2A2A" BorderThickness="1" CornerRadius="12" Padding="16" Width="520">
-                        <StackPanel Spacing="10">
+                <!-- Phase 2: Persistence -->
+                <Border Background="#0D1117" BorderBrush="#2A2E39" BorderThickness="1">
+                    <StackPanel>
+                        <Border Background="#090E18" BorderBrush="#2A2E39" BorderThickness="0,0,0,1" Padding="14,9">
                             <Grid ColumnDefinitions="*,Auto">
-                                <StackPanel>
-                                    <TextBlock Text="Phase 2" Foreground="#6B7280" FontSize="11" />
-                                    <TextBlock Text="Persistence" FontWeight="SemiBold" />
+                                <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                                    <TextBlock Text="PHASE 02" FontSize="10" FontWeight="SemiBold" Foreground="#6B7280" VerticalAlignment="Center"/>
+                                    <Border Width="1" Height="12" Background="#2A2E39" VerticalAlignment="Center"/>
+                                    <TextBlock Text="PERSISTENCE" FontSize="10" FontWeight="SemiBold" Foreground="#9FB0D8" VerticalAlignment="Center"/>
                                 </StackPanel>
-                                <CheckBox Grid.Column="1" IsChecked="{Binding PersistenceEnabled}" Content="Enable" />
+                                <CheckBox Grid.Column="1" IsChecked="{Binding PersistenceEnabled}" Content="ENABLE"/>
                             </Grid>
-
-                            <StackPanel IsVisible="{Binding ShowPersistenceFields}" Spacing="8">
-                                <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-                                    <TextBlock Text="Behavior" Foreground="#9FB0D8" Width="100" VerticalAlignment="Center" />
-                                    <ComboBox Width="280"
+                        </Border>
+                        <Border IsVisible="{Binding ShowPersistenceFields}" Padding="14,10,14,12">
+                            <StackPanel Spacing="8">
+                                <Grid ColumnDefinitions="110,*">
+                                    <TextBlock Text="BEHAVIOR" FontSize="10" FontWeight="SemiBold" Foreground="#6B7280" VerticalAlignment="Center"/>
+                                    <ComboBox Grid.Column="1"
                                               ItemsSource="{Binding PersistenceBehaviors}"
-                                              SelectedItem="{Binding PersistenceBehavior}" />
-                                </StackPanel>
-                                <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-                                    <TextBlock Text="Service Name" Foreground="#9FB0D8" Width="100" VerticalAlignment="Center" />
-                                    <TextBox Width="280" Text="{Binding PersistenceServiceName}" Watermark="MyService" />
-                                </StackPanel>
-                                <CheckBox IsChecked="{Binding PersistenceUseDefaultPath}" Content="Use default path" />
-                                <StackPanel IsVisible="{Binding ShowPersistenceBinaryPathField}" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-                                    <TextBlock Text="Binary Path" Foreground="#9FB0D8" Width="100" VerticalAlignment="Center" />
-                                    <TextBox Width="280" Text="{Binding PersistenceBinaryPath}" Watermark="C:\path\to\service.exe" />
-                                </StackPanel>
+                                              SelectedItem="{Binding PersistenceBehavior}"
+                                              HorizontalAlignment="Stretch"/>
+                                </Grid>
+                                <Grid ColumnDefinitions="110,*">
+                                    <TextBlock Text="SERVICE NAME" FontSize="10" FontWeight="SemiBold" Foreground="#6B7280" VerticalAlignment="Center"/>
+                                    <TextBox Grid.Column="1" Text="{Binding PersistenceServiceName}" Watermark="MyService"/>
+                                </Grid>
+                                <CheckBox IsChecked="{Binding PersistenceUseDefaultPath}" Content="USE DEFAULT PATH"/>
+                                <Grid ColumnDefinitions="110,*" IsVisible="{Binding ShowPersistenceBinaryPathField}">
+                                    <TextBlock Text="BINARY PATH" FontSize="10" FontWeight="SemiBold" Foreground="#6B7280" VerticalAlignment="Center"/>
+                                    <TextBox Grid.Column="1" Text="{Binding PersistenceBinaryPath}" Watermark="C:\path\to\service.exe"/>
+                                </Grid>
                             </StackPanel>
-                        </StackPanel>
-                    </Border>
+                        </Border>
+                    </StackPanel>
+                </Border>
 
-                    <Border Height="24" Width="2" Background="#2A2A2A" HorizontalAlignment="Center" />
+                <!-- Connector -->
+                <Border Height="16" Width="1" Background="#2A2E39" HorizontalAlignment="Left" Margin="14,0,0,0"/>
 
-                    <Border Background="#1E1E1E" BorderBrush="#2A2A2A" BorderThickness="1" CornerRadius="12" Padding="16" Width="520">
-                        <StackPanel Spacing="10">
+                <!-- Phase 3: Injection -->
+                <Border Background="#0D1117" BorderBrush="#2A2E39" BorderThickness="1">
+                    <StackPanel>
+                        <Border Background="#090E18" BorderBrush="#2A2E39" BorderThickness="0,0,0,1" Padding="14,9">
                             <Grid ColumnDefinitions="*,Auto">
-                                <StackPanel>
-                                    <TextBlock Text="Phase 3" Foreground="#6B7280" FontSize="11" />
-                                    <TextBlock Text="Injection" FontWeight="SemiBold" />
+                                <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                                    <TextBlock Text="PHASE 03" FontSize="10" FontWeight="SemiBold" Foreground="#6B7280" VerticalAlignment="Center"/>
+                                    <Border Width="1" Height="12" Background="#2A2E39" VerticalAlignment="Center"/>
+                                    <TextBlock Text="INJECTION" FontSize="10" FontWeight="SemiBold" Foreground="#9FB0D8" VerticalAlignment="Center"/>
                                 </StackPanel>
-                                <CheckBox Grid.Column="1" IsChecked="{Binding InjectionEnabled}" Content="Enable" />
+                                <CheckBox Grid.Column="1" IsChecked="{Binding InjectionEnabled}" Content="ENABLE"/>
                             </Grid>
-
-                            <StackPanel IsVisible="{Binding ShowInjectionFields}" Spacing="8">
-                                <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-                                    <TextBlock Text="Behavior" Foreground="#9FB0D8" Width="100" VerticalAlignment="Center" />
-                                    <ComboBox Width="280"
+                        </Border>
+                        <Border IsVisible="{Binding ShowInjectionFields}" Padding="14,10,14,12">
+                            <StackPanel Spacing="8">
+                                <Grid ColumnDefinitions="110,*">
+                                    <TextBlock Text="BEHAVIOR" FontSize="10" FontWeight="SemiBold" Foreground="#6B7280" VerticalAlignment="Center"/>
+                                    <ComboBox Grid.Column="1"
                                               ItemsSource="{Binding InjectionBehaviors}"
-                                              SelectedItem="{Binding InjectionBehavior}" />
-                                </StackPanel>
-                                <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-                                    <TextBlock Text="Payload" Foreground="#9FB0D8" Width="100" VerticalAlignment="Center" />
-                                    <ComboBox Width="280"
+                                              SelectedItem="{Binding InjectionBehavior}"
+                                              HorizontalAlignment="Stretch"/>
+                                </Grid>
+                                <Grid ColumnDefinitions="110,*">
+                                    <TextBlock Text="PAYLOAD" FontSize="10" FontWeight="SemiBold" Foreground="#6B7280" VerticalAlignment="Center"/>
+                                    <ComboBox Grid.Column="1"
                                               ItemsSource="{Binding Payloads}"
-                                              SelectedItem="{Binding InjectionPayloadName}" />
-                                </StackPanel>
-                                <StackPanel IsVisible="{Binding ShowInjectionPidField}" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-                                    <TextBlock Text="Target PID" Foreground="#9FB0D8" Width="100" VerticalAlignment="Center" />
-                                    <TextBox Width="280" Text="{Binding InjectionTargetPid}" Watermark="Process ID" />
-                                </StackPanel>
-                                <StackPanel IsVisible="{Binding ShowInjectionProgramField}" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-                                    <TextBlock Text="Program" Foreground="#9FB0D8" Width="100" VerticalAlignment="Center" />
-                                    <TextBox Width="280" Text="{Binding InjectionProgramName}" Watermark="Program name" />
-                                </StackPanel>
+                                              SelectedItem="{Binding InjectionPayloadName}"
+                                              HorizontalAlignment="Stretch"/>
+                                </Grid>
+                                <Grid ColumnDefinitions="110,*" IsVisible="{Binding ShowInjectionPidField}">
+                                    <TextBlock Text="TARGET PID" FontSize="10" FontWeight="SemiBold" Foreground="#6B7280" VerticalAlignment="Center"/>
+                                    <TextBox Grid.Column="1" Text="{Binding InjectionTargetPid}" Watermark="Process ID"/>
+                                </Grid>
+                                <Grid ColumnDefinitions="110,*" IsVisible="{Binding ShowInjectionProgramField}">
+                                    <TextBlock Text="PROGRAM" FontSize="10" FontWeight="SemiBold" Foreground="#6B7280" VerticalAlignment="Center"/>
+                                    <TextBox Grid.Column="1" Text="{Binding InjectionProgramName}" Watermark="Program name"/>
+                                </Grid>
                             </StackPanel>
-                        </StackPanel>
-                    </Border>
+                        </Border>
+                    </StackPanel>
+                </Border>
 
-                </StackPanel>
-            </ScrollViewer>
+            </StackPanel>
+        </ScrollViewer>
 
-            <Button Grid.Row="2"
-                    Classes="Primary"
-                    Content="Run Chain"
+        <!-- Bottom action bar -->
+        <Border Grid.Row="1"
+                Background="#090E18"
+                BorderBrush="#2A2E39"
+                BorderThickness="0,1,0,0"
+                Padding="20,10">
+            <Button Classes="runBtn"
+                    Content="RUN CHAIN"
                     HorizontalAlignment="Right"
-                    Command="{Binding RunChainCommand}" />
-        </Grid>
-    </Border>
+                    Command="{Binding RunChainCommand}"/>
+        </Border>
+
+    </Grid>
 
 </UserControl>
