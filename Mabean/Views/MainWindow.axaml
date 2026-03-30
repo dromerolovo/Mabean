@@ -183,7 +183,8 @@ TitleFontWeight="SemiBold">
 		<!-- ══════════════════════════════════
 		         RIGHT PANE — Call Graph
 		     ══════════════════════════════════ -->
-		<Grid Grid.Column="2" RowDefinitions="40,*">
+		<Border Grid.Column="2" BorderBrush="#2A2E39" BorderThickness="1,0,0,0">
+		<Grid RowDefinitions="40,*">
 
 			<Border Grid.Row="0"
 			        Background="#0D1117"
@@ -212,6 +213,7 @@ TitleFontWeight="SemiBold">
 			                                 DataContext="{Binding BehaviorVisualizationViewModel}" />
 
 		</Grid>
+		</Border>
 
 	</Grid>
 </shadui:Window>
