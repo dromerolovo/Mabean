@@ -203,6 +203,9 @@
                             <TextBox Grid.Column="1" Text="{Binding LPort}" Watermark="4444"/>
                         </Grid>
 
+                        <TextBlock Text="Run ncat -lnp 4444 --keep-open on the attacker machine"
+                                   FontSize="12" Foreground="#4B5563" FontStyle="Italic"/>
+
                         <Button Classes="createBtn"
                                 HorizontalAlignment="Right"
                                 Command="{Binding ConfigureReverseShellCommand}"

