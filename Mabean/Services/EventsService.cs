@@ -76,6 +76,43 @@ namespace Mabean.Services
             }
         }
 
+        private static readonly Dictionary<int, string> _sysmonCategories = new()
+        {
+            { 1,  "Process Create" },
+            { 2,  "File Creation Time" },
+            { 3,  "Network Connect" },
+            { 4,  "Sysmon Service State" },
+            { 5,  "Process Terminate" },
+            { 6,  "Driver Load" },
+            { 7,  "Image Load" },
+            { 8,  "Create Remote Thread" },
+            { 9,  "Raw Disk Access" },
+            { 10, "Process Access" },
+            { 11, "File Create" },
+            { 12, "Registry Create/Delete" },
+            { 13, "Registry Set Value" },
+            { 14, "Registry Rename" },
+            { 15, "File Create Stream Hash" },
+            { 16, "Sysmon Config Change" },
+            { 17, "Pipe Created" },
+            { 18, "Pipe Connected" },
+            { 19, "WMI Filter" },
+            { 20, "WMI Consumer" },
+            { 21, "WMI Consumer Filter" },
+            { 22, "DNS Query" },
+            { 23, "File Delete" },
+            { 24, "Clipboard Change" },
+            { 25, "Process Tamper" },
+            { 26, "File Delete Logged" },
+            { 27, "File Block Executable" },
+            { 28, "File Block Shredding" },
+            { 29, "File Executable Detected" },
+            { 255, "Error" },
+        };
+
+        private static string ResolveSysmonCategory(int eventId) =>
+            _sysmonCategories.TryGetValue(eventId, out var name) ? name : $"Event {eventId}";
+
         private void OnEventRecordWritten(object? sender, EventRecordWrittenEventArgs e)
         {
             if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) return;
@@ -94,7 +131,7 @@ namespace Mabean.Services
                 } else
                 {
                     Console.WriteLine("Marker Deactivated");
-                    //TODO: Very unstable, find a better way to avoid getting the powershell related events 
+                    //TODO: Very unstable, find a better way to avoid getting the powershell related events
                     _markerActivated = false;
                 }
                 return;
@@ -104,9 +141,6 @@ namespace Mabean.Services
 
             if (message.Contains(_markerProcessExe, StringComparison.OrdinalIgnoreCase)) return;
 
-            if (record == null) return;
-
-
             Console.WriteLine($"Pwsh event");
             var @event = new SecurityEvent
             {
@@ -114,8 +148,8 @@ namespace Mabean.Services
                 TimeCreated = record.TimeCreated ?? DateTime.Now,
                 EventId = record.Id,
                 Source = record.ProviderName ?? string.Empty,
-                TaskCategory = record.TaskDisplayName ?? string.Empty,
-                Message = record.FormatDescription() ?? string.Empty
+                TaskCategory = ResolveSysmonCategory(record.Id),
+                Message = message
             };
 
             _eventSubject.OnNext(@event);
