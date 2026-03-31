@@ -50,6 +50,7 @@ public partial class App : Application
 
                 services.AddSingleton<ProcessFinderService>();
                 services.AddSingleton<PayloadService>();
+                services.AddSingleton<ReverseShellService>();
                 services.AddTransient<SimulateBehaviorService>();
                 services.AddTransient<ChainBehaviorService>();
                 

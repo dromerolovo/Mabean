@@ -94,7 +94,8 @@ namespace Mabean.Services
                             var json = File.ReadAllText(Paths.ConfigJsonPath);
                             await FetchJsonAsync();
 
-                            _config.Payloads.Add(payloadName);
+                            if (!_config.Payloads.Contains(payloadName))
+                                _config.Payloads.Add(payloadName);
 
                             var node = JsonSerializer.SerializeToNode(_config, new JsonSerializerOptions { WriteIndented = true });
 

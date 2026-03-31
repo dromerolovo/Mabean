@@ -53,6 +53,12 @@ public partial class MainWindowViewModel : ViewModelBase
         };
     }
 
+    partial void OnLeftTabChanged(int value)
+    {
+        if (value == 1)
+            _ = BehaviorSimulationViewModel.LoadPayloadsCommand.ExecuteAsync(null);
+    }
+
     [RelayCommand] void SelectChain() => LeftTab = 0;
     [RelayCommand] void SelectSimulate() => LeftTab = 1;
     [RelayCommand] void SelectPayloads() => LeftTab = 2;

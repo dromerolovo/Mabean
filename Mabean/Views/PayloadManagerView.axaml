@@ -49,7 +49,7 @@
         </Style>
     </UserControl.Styles>
 
-    <Grid Background="#070C14" RowDefinitions="Auto,*">
+    <Grid Background="#070C14" RowDefinitions="Auto,*,Auto">
 
         <!-- Create form -->
         <Border Grid.Row="0" Background="#0D1117" BorderBrush="#2A2E39" BorderThickness="0,0,0,1">
@@ -126,6 +126,93 @@
             </Border>
 
         </Grid>
+
+        <!-- Configure Reverse Shell -->
+        <Border Grid.Row="2" Background="#0D1117" BorderBrush="#2A2E39" BorderThickness="0,1,0,0">
+            <StackPanel>
+
+                <!-- Section header -->
+                <Border Background="#090E18" BorderBrush="#2A2E39" BorderThickness="0,0,0,1" Padding="14,9">
+                    <Grid ColumnDefinitions="*,Auto">
+                        <TextBlock Text="CONFIGURE REVERSE SHELL" FontSize="10" FontWeight="SemiBold" Foreground="#6B7280" VerticalAlignment="Center"/>
+
+                        <!-- Status indicator -->
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="7" VerticalAlignment="Center">
+
+                            <!-- Unconfigured -->
+                            <StackPanel Orientation="Horizontal" Spacing="5"
+                                        IsVisible="{Binding IsUnconfigured}">
+                                <Ellipse Width="7" Height="7" Fill="#4B5563"/>
+                                <TextBlock Text="UNCONFIGURED" FontSize="9" FontWeight="SemiBold" Foreground="#4B5563" VerticalAlignment="Center"/>
+                            </StackPanel>
+
+                            <!-- Unavailable -->
+                            <StackPanel Orientation="Horizontal" Spacing="5"
+                                        IsVisible="{Binding IsUnavailable}">
+                                <Ellipse Width="7" Height="7" Fill="#EF4444"/>
+                                <TextBlock Text="UNAVAILABLE" FontSize="9" FontWeight="SemiBold" Foreground="#EF4444" VerticalAlignment="Center"/>
+                            </StackPanel>
+
+                            <!-- Available (pulsing) -->
+                            <StackPanel Orientation="Horizontal" Spacing="5"
+                                        IsVisible="{Binding IsAvailable}">
+                                <Panel Width="14" Height="14" VerticalAlignment="Center">
+                                    <Ellipse Width="14" Height="14" Fill="#22C55E" Opacity="0">
+                                        <Ellipse.RenderTransform>
+                                            <ScaleTransform ScaleX="1" ScaleY="1"/>
+                                        </Ellipse.RenderTransform>
+                                        <Ellipse.Styles>
+                                            <Style Selector="Ellipse">
+                                                <Style.Animations>
+                                                    <Animation Duration="0:0:1.5" IterationCount="Infinite">
+                                                        <KeyFrame Cue="0%">
+                                                            <Setter Property="Opacity" Value="0.7"/>
+                                                            <Setter Property="ScaleTransform.ScaleX" Value="0.5"/>
+                                                            <Setter Property="ScaleTransform.ScaleY" Value="0.5"/>
+                                                        </KeyFrame>
+                                                        <KeyFrame Cue="100%">
+                                                            <Setter Property="Opacity" Value="0"/>
+                                                            <Setter Property="ScaleTransform.ScaleX" Value="2"/>
+                                                            <Setter Property="ScaleTransform.ScaleY" Value="2"/>
+                                                        </KeyFrame>
+                                                    </Animation>
+                                                </Style.Animations>
+                                            </Style>
+                                        </Ellipse.Styles>
+                                    </Ellipse>
+                                    <Ellipse Width="7" Height="7" Fill="#22C55E" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Panel>
+                                <TextBlock Text="AVAILABLE" FontSize="9" FontWeight="SemiBold" Foreground="#22C55E" VerticalAlignment="Center"/>
+                            </StackPanel>
+
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <!-- Fields -->
+                <Border Padding="14,12,14,14">
+                    <StackPanel Spacing="10">
+
+                        <Grid ColumnDefinitions="110,*">
+                            <TextBlock Text="LHOST" FontSize="10" FontWeight="SemiBold" Foreground="#6B7280" VerticalAlignment="Center"/>
+                            <TextBox Grid.Column="1" Text="{Binding LHost}" Watermark="192.168.1.1"/>
+                        </Grid>
+
+                        <Grid ColumnDefinitions="110,*">
+                            <TextBlock Text="LPORT" FontSize="10" FontWeight="SemiBold" Foreground="#6B7280" VerticalAlignment="Center"/>
+                            <TextBox Grid.Column="1" Text="{Binding LPort}" Watermark="4444"/>
+                        </Grid>
+
+                        <Button Classes="createBtn"
+                                HorizontalAlignment="Right"
+                                Command="{Binding ConfigureReverseShellCommand}"
+                                Content="CONFIGURE"/>
+
+                    </StackPanel>
+                </Border>
+
+            </StackPanel>
+        </Border>
 
     </Grid>
 
