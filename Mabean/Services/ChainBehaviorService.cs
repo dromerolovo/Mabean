@@ -37,10 +37,10 @@ public class ChainBehaviorService
                     var context = new BehaviorContext
                     {
                         BehaviorName = "Injection-Simple",
-                        DllPath = Path.Combine(Paths.Dlls, "1.dll").ToString(),
+                        DllPath = @"C:\ProgramData\Mabean\Dlls\1.dll",
                         TargetPID = injection.TargetPid ?? 0,
                         ProgramName = null,
-                        PayloadPath = injection.PayloadName
+                        PayloadPath = @"C:\ProgramData\Mabean\Payloads\" +  injection.PayloadName
                     };
                     await WriteBehaviorContext(context);
                     break;
