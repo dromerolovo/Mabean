@@ -141,6 +141,8 @@ namespace Mabean.Services
 
             if (message.Contains(_markerProcessExe, StringComparison.OrdinalIgnoreCase)) return;
 
+            if (record.Id == 22) return;
+
             Console.WriteLine($"Pwsh event");
             var @event = new SecurityEvent
             {

@@ -129,7 +129,8 @@
                 </DrawingBrush>
             </Border.Background>
 
-            <ScrollViewer HorizontalScrollBarVisibility="Auto"
+            <ScrollViewer x:Name="NodeScrollViewer"
+                          HorizontalScrollBarVisibility="Auto"
                           VerticalScrollBarVisibility="Auto">
                 <Grid Width="{Binding CanvasWidth}" Height="{Binding CanvasHeight}"
                       HorizontalAlignment="Left" VerticalAlignment="Top">
