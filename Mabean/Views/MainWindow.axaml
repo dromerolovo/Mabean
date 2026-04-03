@@ -148,27 +148,26 @@ TitleFontWeight="SemiBold">
 			        BorderBrush="#2A2E39"
 			        BorderThickness="0,0,1,1">
 				<Grid ColumnDefinitions="Auto,Auto,*,Auto" Margin="0,0,8,0">
-					<StackPanel Grid.Column="0" Orientation="Horizontal">
+					<StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
 						<Button Classes="tabBtn"
 						        Classes.active="{Binding ShowEvents}"
 						        Command="{Binding SelectEventsCommand}"
 						        Content="EVENTS" />
+						<Border Background="#161D2C"
+						        BorderBrush="#2A2E39"
+						        BorderThickness="1"
+						        CornerRadius="10"
+						        Padding="7,2" Margin="0,0,4,0"
+						        VerticalAlignment="Center"
+						        >
+							<TextBlock Text="{Binding EventsViewModel.SecurityEvents.Count}"
+							           FontSize="10" Foreground="#9FB0D8" />
+						</Border>
 						<Button Classes="tabBtn"
 						        Classes.active="{Binding ShowProcesses}"
 						        Command="{Binding SelectProcessesCommand}"
 						        Content="PROCESSES" />
 					</StackPanel>
-					<Border Grid.Column="1"
-					        Background="#161D2C"
-					        BorderBrush="#2A2E39"
-					        BorderThickness="1"
-					        CornerRadius="10"
-					        Padding="7,2" Margin="4,0,0,0"
-					        VerticalAlignment="Center"
-					        IsVisible="{Binding ShowEvents}">
-						<TextBlock Text="{Binding EventsViewModel.SecurityEvents.Count}"
-						           FontSize="10" Foreground="#9FB0D8" />
-					</Border>
 					<StackPanel Grid.Column="3"
 					            Orientation="Horizontal"
 					            Spacing="6" VerticalAlignment="Center"
@@ -192,7 +191,7 @@ TitleFontWeight="SemiBold">
 			</Border>
 
 			<Grid Grid.Row="1">
-				<Border IsVisible="{Binding ShowEvents}">
+				<Border >
 					<views:EventsView DataContext="{Binding EventsViewModel}" />
 				</Border>
 				<Border IsVisible="{Binding ShowProcesses}">
