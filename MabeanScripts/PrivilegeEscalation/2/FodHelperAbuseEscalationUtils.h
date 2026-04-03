@@ -5,4 +5,6 @@
 #include <wchar.h>
 #include <shellapi.h>
 
-int FodHelperAbuseEscalationInternal(const char* execPath);
+typedef void (*StepCallback)(const char* stepName, int stepIndex);
+
+int FodHelperAbuseEscalationInternal(const char* execPath, StepCallback callback);

