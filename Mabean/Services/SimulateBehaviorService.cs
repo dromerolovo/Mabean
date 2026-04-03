@@ -1,47 +1,53 @@
-﻿using Mabean.Interop;
-using System;
-using System.Collections.Generic;
-using System.Text;
+using Mabean.Interop;
 using System.Threading.Tasks;
 
 namespace Mabean.Services
 {
     public class SimulateBehaviorService
     {
-        private readonly PayloadService _payloadService;
+        private readonly SimulationStepService _stepService;
 
-        public SimulateBehaviorService(PayloadService payloadService)
+        public SimulateBehaviorService(SimulationStepService stepService)
         {
-            _payloadService = payloadService;
+            _stepService = stepService;
         }
 
         public async Task InjectBehavior(uint puid, string specificBehavior, string payloadName, string? programName)
         {
             LoggerService.Write($"[+] Simulating behavior: {specificBehavior} into process with PUID: {puid} using payload: {payloadName}");
-            switch (specificBehavior) 
+
+            _stepService.BeginSimulation(specificBehavior);
+            var callback = _stepService.GetCallback();
+
+            switch (specificBehavior)
             {
                 case "Injection-Simple":
-                    var code = InteropInjection.InjectPayloadSimple(puid, await PayloadService.GetPayload(payloadName), (uint)(await PayloadService.GetPayload(payloadName)).Length);
+                    var payload1 = await PayloadService.GetPayload(payloadName);
+                    var code = await Task.Run(() => InteropInjection.InjectPayloadSimple(puid, payload1, (uint)payload1.Length, callback));
                     LoggerService.Write($"[+] Injected payload into process with PUID: {puid} with return code: {code}");
                     break;
+
                 case "Injection-Apc-MultiThreaded":
-                    var code2 = InteropInjection.InjectPayloadApcMultiThreaded(puid, await PayloadService.GetPayload(payloadName), (nuint)(await PayloadService.GetPayload(payloadName)).Length);
+                    var payload2 = await PayloadService.GetPayload(payloadName);
+                    var code2 = await Task.Run(() => InteropInjection.InjectPayloadApcMultiThreaded(puid, payload2, (nuint)payload2.Length, callback));
                     LoggerService.Write($"[+] Injected payload into process with PUID: {puid} with return code: {code2}");
                     break;
+
                 case "Injection-Apc-EarlyBird":
-                    var code3 = InteropInjection.InjectPayloadApcEarlyBird(programName!, await PayloadService.GetPayload(payloadName), (nuint)(await PayloadService.GetPayload(payloadName)).Length);
-                    Console.WriteLine(code3);
+                    var payload3 = await PayloadService.GetPayload(payloadName);
+                    var code3 = await Task.Run(() => InteropInjection.InjectPayloadApcEarlyBird(programName!, payload3, (nuint)payload3.Length, callback));
                     LoggerService.Write($"[+] Injected payload into process with PUID: {puid} with return code: {code3}");
                     break;
+
                 case "PrivilegeEscalation-TokenTheft":
-                    var code4 = InteropPrivilegeEscalation.TokenTheftEscalation(puid);
+                    var code4 = await Task.Run(() => InteropPrivilegeEscalation.TokenTheftEscalation(puid, callback));
                     LoggerService.Write($"[+] Performed token theft escalation into process with PUID: {puid} with return code: {code4}");
                     break;
+
                 case "PrivilegeEscalation-FodHelperAbuse":
-                    var code5 = InteropPrivilegeEscalation.FodHelperAbuseEscalation(null);
+                    var code5 = await Task.Run(() => InteropPrivilegeEscalation.FodHelperAbuseEscalation(null, callback));
                     LoggerService.Write($"[+] Performed FodHelper abuse escalation with return code: {code5}");
                     break;
-
             }
         }
     }

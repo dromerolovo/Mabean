@@ -45,13 +45,15 @@ public partial class App : Application
                 services.AddTransient<BehaviorSimulationViewModel>();
                 services.AddTransient<EventsViewModel>();
                 services.AddTransient<ProcessFinderViewModel>();
-                services.AddTransient<BehaviorVisualizationViewModel>();
+                services.AddSingleton<SimulationStepService>();
+                services.AddSingleton<BehaviorVisualizationViewModel>();
                 services.AddTransient<BehaviorChainViewModel>();
 
                 services.AddSingleton<ProcessFinderService>();
                 services.AddSingleton<PayloadService>();
                 services.AddSingleton<ReverseShellService>();
                 services.AddTransient<SimulateBehaviorService>();
+
                 services.AddTransient<ChainBehaviorService>();
                 
 

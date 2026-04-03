@@ -1,9 +1,7 @@
-﻿using Mabean.Helpers;
-using System;
-using System.Collections.Generic;
+using Mabean.Helpers;
+using Mabean.Services;
 using System.IO;
 using System.Runtime.InteropServices;
-using System.Text;
 
 namespace Mabean.Interop
 {
@@ -18,32 +16,31 @@ namespace Mabean.Interop
         [DllImport("1.dll",
             CallingConvention = CallingConvention.Cdecl,
             ExactSpelling = true)]
-                public static extern int InjectPayloadSimple(
+        public static extern int InjectPayloadSimple(
             uint pid,
             byte[] payload,
-            uint length
+            uint length,
+            SimulationStepService.StepCallbackDelegate? callback
         );
 
         [DllImport("1.dll",
             CallingConvention = CallingConvention.Cdecl,
             ExactSpelling = true)]
-                public static extern int InjectPayloadApcMultiThreaded(
+        public static extern int InjectPayloadApcMultiThreaded(
             uint pid,
             byte[] payload,
-            nuint length
+            nuint length,
+            SimulationStepService.StepCallbackDelegate? callback
         );
 
         [DllImport("1.dll",
             CallingConvention = CallingConvention.Cdecl,
             ExactSpelling = true)]
-                public static extern int InjectPayloadApcEarlyBird(
+        public static extern int InjectPayloadApcEarlyBird(
             string programName,
             byte[] payload,
-            nuint length
+            nuint length,
+            SimulationStepService.StepCallbackDelegate? callback
         );
-
-        
-
-
     }
 }

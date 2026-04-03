@@ -1,4 +1,5 @@
 using Mabean.Models;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
@@ -18,6 +19,15 @@ namespace Mabean.Builders
         {
             _type = type;
             return this;
+        }
+
+        public Dictionary<string, VisualizationNode> BuildLookup(string libraryPath, string behaviorType)
+        {
+            var root = WithType(behaviorType).Build(libraryPath);
+            var lookup = new Dictionary<string, VisualizationNode>(StringComparer.OrdinalIgnoreCase);
+            for (var node = root; node != null; node = node.Next)
+                lookup[node.Signature.FunctionName] = node;
+            return lookup;
         }
 
         public VisualizationNode? Build(string libraryPath)

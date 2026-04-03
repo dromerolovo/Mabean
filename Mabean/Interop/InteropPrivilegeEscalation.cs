@@ -1,9 +1,7 @@
-﻿using Mabean.Helpers;
-using System;
-using System.Collections.Generic;
+using Mabean.Helpers;
+using Mabean.Services;
 using System.IO;
 using System.Runtime.InteropServices;
-using System.Text;
 
 namespace Mabean.Interop
 {
@@ -18,16 +16,17 @@ namespace Mabean.Interop
         [DllImport("2.dll",
             CallingConvention = CallingConvention.Cdecl,
             ExactSpelling = true)]
-                public static extern int TokenTheftEscalation(
-            nuint pid
+        public static extern int TokenTheftEscalation(
+            nuint pid,
+            SimulationStepService.StepCallbackDelegate? callback
         );
 
         [DllImport("2.dll",
-        CallingConvention = CallingConvention.Cdecl,
-        ExactSpelling = true)]
-            public static extern int FodHelperAbuseEscalation(
-            [MarshalAs(UnmanagedType.LPStr)] string? execPath
+            CallingConvention = CallingConvention.Cdecl,
+            ExactSpelling = true)]
+        public static extern int FodHelperAbuseEscalation(
+            [MarshalAs(UnmanagedType.LPStr)] string? execPath,
+            SimulationStepService.StepCallbackDelegate? callback
         );
-
     }
 }
