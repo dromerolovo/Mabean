@@ -18,7 +18,7 @@ public partial class BehaviorVisualizationViewModel : ViewModelBase
 
     private const double StartX     = 60;
     private const double StartY     = 40;
-    private const double OffsetY    = 140;
+    private const double OffsetY    = 180;
     private const double CardWidth  = 260;
     private const double CardHeight = 80;
 
