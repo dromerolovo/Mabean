@@ -9,6 +9,7 @@ namespace Mabean.Services
     public class ReverseShellService : IDisposable
     {
         private readonly PayloadService _payloadService;
+        private readonly EventsService _eventsService;
         private Timer? _pollTimer;
 
         public string LHost { get; private set; } = "";
@@ -17,9 +18,10 @@ namespace Mabean.Services
 
         public event Action? StatusChanged;
 
-        public ReverseShellService(PayloadService payloadService)
+        public ReverseShellService(PayloadService payloadService, EventsService eventsService)
         {
             _payloadService = payloadService;
+            _eventsService = eventsService;
         }
 
         public async Task ConfigureAsync(string lhost, string lport)
@@ -66,7 +68,8 @@ namespace Mabean.Services
         {
             _pollTimer?.Dispose();
             _pollTimer = null;
-            LoggerService.Write($"[ReverseShell] Payload executed — reverse shell connection expected on {LHost}:{LPort}");
+            LoggerService.Write($"[ReverseShell] Payload executed — watching for reverse shell connection on {LHost}:{LPort}");
+            _eventsService.StartReverseShellWatcher(LHost, LPort);
         }
 
         private void SetStatus(ReverseShellStatus status)

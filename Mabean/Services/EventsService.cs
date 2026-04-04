@@ -17,10 +17,12 @@ namespace Mabean.Services
     public class EventsService : BackgroundService
     {
         private EventLogWatcher? _watcher;
+        private EventLogWatcher? _reverseShellWatcher;
         private const string _sysmonLogName = "Microsoft-Windows-Sysmon/Operational";
         private const int _maxEventsLimit = 500;
         private const string _markerProcessExe = "MabeanMarker.exe";
         private volatile bool _markerActivated = false;
+        private readonly int _currentPid = Process.GetCurrentProcess().Id;
 
         private readonly Subject<SecurityEvent> _eventSubject = new();
         //private readonly BehaviorSubject<string> _statusSubject = new("Starting...");
@@ -157,18 +159,70 @@ namespace Mabean.Services
             _eventSubject.OnNext(@event);
         }
 
+        public void StartReverseShellWatcher(string lhost, string lport)
+        {
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) return;
+
+            _reverseShellWatcher?.Dispose();
+
+            var xpathQuery = $@"
+            *[System[Provider[@Name='Microsoft-Windows-Sysmon']]]
+            [System[EventID=3]]
+            [EventData[
+              Data[@Name='DestinationPort']='{lport}' and
+              Data[@Name='DestinationIp']='{lhost}'
+            ]]";
+
+            var query = new EventLogQuery(_sysmonLogName, PathType.LogName, xpathQuery);
+            _reverseShellWatcher = new EventLogWatcher(query);
+            _reverseShellWatcher.EventRecordWritten += OnReverseShellEventWritten;
+            _reverseShellWatcher.Enabled = true;
+        }
+
+        private void OnReverseShellEventWritten(object? sender, EventRecordWrittenEventArgs e)
+        {
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) return;
+            if (e.EventRecord == null) return;
+
+            using var record = e.EventRecord;
+            var message = record.FormatDescription() ?? string.Empty;
+
+            if (message.Contains($"ProcessId: {_currentPid}")) return;
+
+            var @event = new SecurityEvent
+            {
+                RecordId = record.RecordId ?? 0,
+                TimeCreated = record.TimeCreated ?? DateTime.Now,
+                EventId = record.Id,
+                Source = record.ProviderName ?? string.Empty,
+                TaskCategory = "Reverse Shell Connection",
+                Message = message
+            };
+
+            _eventSubject.OnNext(@event);
+        }
+
         public override Task StopAsync(CancellationToken cancellationToken)
         {
-            if (_watcher != null)
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                if (_watcher != null)
                 {
                     _watcher.EventRecordWritten -= OnEventRecordWritten;
                     _watcher.Enabled = false;
                     _watcher.Dispose();
                     _watcher = null;
-                    _eventSubject.OnCompleted();
                 }
+
+                if (_reverseShellWatcher != null)
+                {
+                    _reverseShellWatcher.EventRecordWritten -= OnReverseShellEventWritten;
+                    _reverseShellWatcher.Enabled = false;
+                    _reverseShellWatcher.Dispose();
+                    _reverseShellWatcher = null;
+                }
+
+                _eventSubject.OnCompleted();
             }
             IsWatching = false;
             return base.StopAsync(cancellationToken);
