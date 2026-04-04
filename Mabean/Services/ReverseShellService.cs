@@ -62,6 +62,13 @@ namespace Mabean.Services
             }
         }
 
+        public void StopPolling()
+        {
+            _pollTimer?.Dispose();
+            _pollTimer = null;
+            LoggerService.Write($"[ReverseShell] Payload executed — reverse shell connection expected on {LHost}:{LPort}");
+        }
+
         private void SetStatus(ReverseShellStatus status)
         {
             if (Status == status) return;
