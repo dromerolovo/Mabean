@@ -143,6 +143,7 @@ namespace Mabean.Services
 
             if (message.Contains(_markerProcessExe, StringComparison.OrdinalIgnoreCase)) return;
 
+            if (record.Id == 3) return;
             if (record.Id == 22) return;
 
             Console.WriteLine($"Pwsh event");
