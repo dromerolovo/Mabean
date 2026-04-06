@@ -14,6 +14,8 @@ if (-not $IsAdmin) {
     exit
 }
 
+Set-MpPreference -DisableRealtimeMonitoring $true
+
 #-------------------------------------Sysmon installation--------------------------------------------------
 
 $IsSysmonInstalled = [bool](Get-Service -Name "Sysmon*" -ErrorAction SilentlyContinue)
