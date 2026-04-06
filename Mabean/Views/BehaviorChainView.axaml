@@ -114,7 +114,7 @@
                                 </Grid>
                                 <Grid ColumnDefinitions="110,*">
                                     <TextBlock Text="SERVICE NAME" FontSize="10" FontWeight="SemiBold" Foreground="#6B7280" VerticalAlignment="Center"/>
-                                    <TextBox Grid.Column="1" Text="{Binding PersistenceServiceName}" Watermark="MyService"/>
+                                    <TextBlock Grid.Column="1" Text="MabeanService" FontSize="11" Foreground="#D1D4DC" VerticalAlignment="Center"/>
                                 </Grid>
                                 <CheckBox IsChecked="{Binding PersistenceUseDefaultPath}" Content="USE DEFAULT PATH"/>
                                 <Grid ColumnDefinitions="110,*" IsVisible="{Binding ShowPersistenceBinaryPathField}">

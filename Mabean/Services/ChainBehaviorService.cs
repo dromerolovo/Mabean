@@ -12,11 +12,13 @@ public class ChainBehaviorService
 {
     private readonly PayloadService _payloadService;
     private readonly ReverseShellService _reverseShellService;
+    private readonly EventsService _eventsService;
 
-    public ChainBehaviorService(PayloadService payloadService, ReverseShellService reverseShellService)
+    public ChainBehaviorService(PayloadService payloadService, ReverseShellService reverseShellService, EventsService eventsService)
     {
         _payloadService = payloadService;
         _reverseShellService = reverseShellService;
+        _eventsService = eventsService;
     }
 
     public async Task RunChainAsync(BehaviorChainDefinition chain)
@@ -92,6 +94,7 @@ public class ChainBehaviorService
         if (chain.Persistence is { } persistence)
         {
             LoggerService.Write($"[Chain] Phase 3 - Persistence: {persistence.Behavior} (service: {persistence.ServiceName})");
+            _eventsService.StartServiceWatcher();
         }
     }
 

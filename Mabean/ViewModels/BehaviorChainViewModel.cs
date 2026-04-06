@@ -33,8 +33,9 @@ public partial class BehaviorChainViewModel : ViewModelBase
     [NotifyPropertyChangedFor(nameof(ShowPersistenceFields), nameof(ShowPersistenceBinaryPathField))]
     private bool _persistenceEnabled;
 
+    public const string ServiceName = "MabeanService";
+
     [ObservableProperty] private string _persistenceBehavior = "ServiceInstall";
-    [ObservableProperty] private string _persistenceServiceName = string.Empty;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(ShowPersistenceBinaryPathField))]
@@ -98,8 +99,8 @@ public partial class BehaviorChainViewModel : ViewModelBase
         $@"robocopy ""{Paths.PayloadsDir}"" ""C:\ProgramData\Mabean\Payloads"" /E & " +
         $@"robocopy ""{Paths.SessionConfigDir}"" ""C:\ProgramData\Mabean\SessionConfig"" /E & " +
         $@"robocopy ""{Paths.Dlls}"" ""C:\ProgramData\Mabean\Dlls"" /E & " +
-        $@"sc create {PersistenceServiceName} binPath= ""{destExe}"" start= auto && " +
-        $@"sc start {PersistenceServiceName}";
+        $@"sc create {ServiceName} binPath= ""{destExe}"" start= auto && " +
+        $@"sc start {ServiceName}";
 
     private async Task RunChain()
     {
@@ -119,7 +120,7 @@ public partial class BehaviorChainViewModel : ViewModelBase
             Persistence = PersistenceEnabled ? new PersistenceStep
             {
                 Behavior = PersistenceBehavior,
-                ServiceName = PersistenceServiceName,
+                ServiceName = ServiceName,
                 BinaryPath = resolvedBinaryPath
             } : null,
 

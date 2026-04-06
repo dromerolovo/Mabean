@@ -18,6 +18,8 @@ namespace Mabean.Services
     {
         private EventLogWatcher? _watcher;
         private EventLogWatcher? _reverseShellWatcher;
+        private EventLogWatcher? _serviceWatcher;
+        private const string _serviceBinaryPath = @"C:\ProgramData\Mabean\3.exe";
         private const string _sysmonLogName = "Microsoft-Windows-Sysmon/Operational";
         private const int _maxEventsLimit = 500;
         private const string _markerProcessExe = "MabeanMarker.exe";
@@ -145,6 +147,7 @@ namespace Mabean.Services
 
             if (record.Id == 3) return;
             if (record.Id == 22) return;
+            if (message.Contains("directxdatabasehelper", StringComparison.OrdinalIgnoreCase)) return;
 
             Console.WriteLine($"Pwsh event");
             var @event = new SecurityEvent
@@ -154,6 +157,47 @@ namespace Mabean.Services
                 EventId = record.Id,
                 Source = record.ProviderName ?? string.Empty,
                 TaskCategory = ResolveSysmonCategory(record.Id),
+                Message = message
+            };
+
+            _eventSubject.OnNext(@event);
+        }
+
+        public void StartServiceWatcher()
+        {
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) return;
+
+            _serviceWatcher?.Dispose();
+
+            var xpathQuery = $@"
+            *[System[Provider[@Name='Microsoft-Windows-Sysmon']]]
+            [EventData[
+              Data[@Name='Image']='{_serviceBinaryPath}' or
+              Data[@Name='ParentImage']='{_serviceBinaryPath}' or
+              Data[@Name='SourceImage']='{_serviceBinaryPath}'
+            ]]";
+
+            var query = new EventLogQuery(_sysmonLogName, PathType.LogName, xpathQuery);
+            _serviceWatcher = new EventLogWatcher(query);
+            _serviceWatcher.EventRecordWritten += OnServiceEventWritten;
+            _serviceWatcher.Enabled = true;
+        }
+
+        private void OnServiceEventWritten(object? sender, EventRecordWrittenEventArgs e)
+        {
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) return;
+            if (e.EventRecord == null) return;
+
+            using var record = e.EventRecord;
+            var message = record.FormatDescription() ?? string.Empty;
+
+            var @event = new SecurityEvent
+            {
+                RecordId = record.RecordId ?? 0,
+                TimeCreated = record.TimeCreated ?? DateTime.Now,
+                EventId = record.Id,
+                Source = record.ProviderName ?? string.Empty,
+                TaskCategory = $"[MabeanService] {ResolveSysmonCategory(record.Id)}",
                 Message = message
             };
 
@@ -221,6 +265,14 @@ namespace Mabean.Services
                     _reverseShellWatcher.Enabled = false;
                     _reverseShellWatcher.Dispose();
                     _reverseShellWatcher = null;
+                }
+
+                if (_serviceWatcher != null)
+                {
+                    _serviceWatcher.EventRecordWritten -= OnServiceEventWritten;
+                    _serviceWatcher.Enabled = false;
+                    _serviceWatcher.Dispose();
+                    _serviceWatcher = null;
                 }
 
                 _eventSubject.OnCompleted();

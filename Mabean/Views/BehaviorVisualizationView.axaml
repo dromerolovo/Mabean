@@ -51,7 +51,8 @@
 
                 <!-- Controls -->
                 <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
-                    <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                    <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center"
+                                IsEnabled="{Binding IsBreakAvailable}">
                         <TextBlock Text="BREAK"
                                    FontSize="10"
                                    FontWeight="SemiBold"

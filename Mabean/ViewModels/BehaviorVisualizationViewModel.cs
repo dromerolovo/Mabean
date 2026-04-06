@@ -36,6 +36,12 @@ public partial class BehaviorVisualizationViewModel : ViewModelBase
     private bool _isStepPending;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsBreakAvailable))]
+    private bool _isChainActive;
+
+    public bool IsBreakAvailable => !IsChainActive;
+
+    [ObservableProperty]
     private bool _isBreakEnabled = true;
 
     partial void OnIsBreakEnabledChanged(bool value)

@@ -45,10 +45,16 @@ public partial class MainWindowViewModel : ViewModelBase
         BehaviorVisualizationViewModel = behaviorVisualizationViewModel;
         BehaviorChainViewModel = behaviorChainViewModel;
 
+        behaviorVisualizationViewModel.IsChainActive = true;
+
         behaviorSimulationViewModel.BrowseProcessesRequested = () => MiddleTab = 1;
         processFinderViewModel.ProcessSelected = pid =>
         {
-            behaviorSimulationViewModel.Puid = pid.ToString();
+            if (ShowSimulate)
+                behaviorSimulationViewModel.Puid = pid.ToString();
+            else if (ShowChain && behaviorChainViewModel.ShowInjectionPidField)
+                behaviorChainViewModel.InjectionTargetPid = (uint)pid;
+
             MiddleTab = 0;
         };
     }
@@ -57,6 +63,8 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         if (value == 1)
             _ = BehaviorSimulationViewModel.LoadPayloadsCommand.ExecuteAsync(null);
+
+        BehaviorVisualizationViewModel.IsChainActive = value == 0;
     }
 
     [RelayCommand] void SelectChain() => LeftTab = 0;

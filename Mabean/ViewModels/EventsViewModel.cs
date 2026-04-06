@@ -66,9 +66,21 @@ namespace Mabean.ViewModels
             if (selected.Count > 0)
             {
                 var json = JsonSerializer.SerializeToNode(selected);
-                var response = await _aiService.SendMessageAsync(json.ToJsonString());
 
-                if(!string.IsNullOrEmpty(response)) {
+                string? response;
+                try
+                {
+                    response = await _aiService.SendMessageAsync(json.ToJsonString());
+                }
+                catch (Exception ex)
+                {
+                    Suspiciousness = "Error";
+                    Explanation = $"AI service error: {ex.Message}. Please try again.";
+                    return;
+                }
+
+                if (!string.IsNullOrEmpty(response))
+                {
                     try
                     {
                         response = response.Trim();
@@ -83,10 +95,9 @@ namespace Mabean.ViewModels
 
                         var output = JsonSerializer.Deserialize<Suspiciousness>(response);
                         Suspiciousness = output?.SuspiciousnessName ?? "Unknown";
-
                         Explanation = output?.Analysis ?? "No analysis available.";
                     }
-                    catch (Exception ex) 
+                    catch (Exception ex)
                     {
                         Suspiciousness = "Unknown";
                         Explanation = ex.Message;

