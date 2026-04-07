@@ -1,6 +1,7 @@
 
   param(
-      [switch]$GenerateKey = $false
+      [switch]$GenerateKey = $false,
+      [string]$GeminiApiKey = ""
   )
 
 $IsAdmin = ([Security.Principal.WindowsPrincipal] `
@@ -82,6 +83,17 @@ Copy-Item "$PSScriptRoot\MabeanMarker.exe" -Destination (Join-Path $dataDir "Mab
 
 Set-MpPreference -ExclusionPath $payloadsDir
 
+if ($GeminiApiKey -ne "") {
+    [Environment]::SetEnvironmentVariable("GEMINI_API_KEY", $GeminiApiKey, "User")
+}
 
+dotnet publish ".\Mabean\Mabean.csproj" `
+    -c Release `
+    -r win-x64 `
+    --self-contained false `
+    -p:PublishSingleFile=true `
+    -o "$env:TEMP\MabeanBuild"
 
+  $desktop = [Environment]::GetFolderPath([Environment+SpecialFolder]::Desktop)
+  Copy-Item "$env:TEMP\MabeanBuild\Mabean.exe" -Destination (Join-Path $desktop "Mabean.exe") -Force
 

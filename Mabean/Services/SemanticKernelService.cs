@@ -14,11 +14,11 @@ namespace Mabean.Services
         private readonly IChatCompletionService _chat;
         private readonly ChatHistory _history = new();
 
-        public SemanticKernelService(IConfiguration config)
+        public SemanticKernelService()
         {
             var provider = "gemini";
             var model = "gemini-3-flash-preview";
-            var apiKey = config["GEMINI_API_KEY"] ?? throw new System.Exception("GEMINI_API_KEY not found in configuration");
+            var apiKey = Environment.GetEnvironmentVariable("GEMINI_API_KEY") ?? throw new System.Exception("GEMINI_API_KEY environment variable not set");
 
             var builder = Kernel.CreateBuilder();
 
