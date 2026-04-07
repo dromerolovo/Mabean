@@ -167,6 +167,10 @@ TitleFontWeight="SemiBold">
 						        Classes.active="{Binding ShowProcesses}"
 						        Command="{Binding SelectProcessesCommand}"
 						        Content="PROCESSES" />
+						<Button Classes="tabBtn"
+						        Classes.active="{Binding ShowPrograms}"
+						        Command="{Binding SelectProgramsCommand}"
+						        Content="PROGRAMS" />
 					</StackPanel>
 					<StackPanel Grid.Column="3"
 					            Orientation="Horizontal"
@@ -187,6 +191,14 @@ TitleFontWeight="SemiBold">
 						        Command="{Binding ProcessFinderViewModel.LoadProcessesCommand}"
 						        Content="REFRESH" />
 					</StackPanel>
+					<StackPanel Grid.Column="3"
+					            Orientation="Horizontal"
+					            Spacing="6" VerticalAlignment="Center"
+					            IsVisible="{Binding ShowPrograms}">
+						<Button Classes="paneBtn"
+						        Command="{Binding ProgramFinderViewModel.LoadProgramsCommand}"
+						        Content="REFRESH" />
+					</StackPanel>
 				</Grid>
 			</Border>
 
@@ -196,6 +208,9 @@ TitleFontWeight="SemiBold">
 				</Border>
 				<Border IsVisible="{Binding ShowProcesses}">
 					<views:ProcessFinderView DataContext="{Binding ProcessFinderViewModel}" />
+				</Border>
+				<Border IsVisible="{Binding ShowPrograms}">
+					<views:ProgramFinderView DataContext="{Binding ProgramFinderViewModel}" />
 				</Border>
 			</Grid>
 

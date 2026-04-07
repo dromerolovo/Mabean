@@ -45,6 +45,7 @@ public partial class App : Application
                 services.AddTransient<BehaviorSimulationViewModel>();
                 services.AddTransient<EventsViewModel>();
                 services.AddTransient<ProcessFinderViewModel>();
+                services.AddTransient<ProgramFinderViewModel>();
                 services.AddSingleton<SimulationStepService>();
                 services.AddSingleton<BehaviorVisualizationViewModel>();
                 services.AddTransient<BehaviorChainViewModel>();

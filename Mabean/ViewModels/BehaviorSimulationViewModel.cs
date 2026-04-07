@@ -22,7 +22,6 @@ namespace Mabean.ViewModels
         private ObservableCollection<string> _behaviors = new ObservableCollection<string>()
         {
             "Injection-Simple",
-            "Injection-Apc-MultiThreaded",
             "Injection-Apc-EarlyBird",
             "PrivilegeEscalation-TokenTheft",
             "PrivilegeEscalation-FodHelperAbuse"
@@ -45,6 +44,7 @@ namespace Mabean.ViewModels
         public bool ShowPuidField => !SelectedBehavior.Equals("Injection-Apc-EarlyBird") && !SelectedBehavior.Equals("PrivilegeEscalation-FodHelperAbuse");
 
         public Action? BrowseProcessesRequested { get; set; }
+        public Action? BrowseProgramsRequested { get; set; }
 
         public BehaviorSimulationViewModel(PayloadService payloadService, SimulateBehaviorService simulateBehaviorService)
         {
@@ -55,6 +55,9 @@ namespace Mabean.ViewModels
 
         [RelayCommand]
         private void BrowseProcesses() => BrowseProcessesRequested?.Invoke();
+
+        [RelayCommand]
+        private void BrowsePrograms() => BrowseProgramsRequested?.Invoke();
 
         [RelayCommand]
         private async Task LoadPayloads()

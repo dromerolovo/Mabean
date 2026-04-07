@@ -105,9 +105,13 @@
                                     Command="{Binding BrowseProcessesCommand}"/>
                         </Grid>
 
-                        <Grid ColumnDefinitions="110,*" IsVisible="{Binding ShowProgramNameField}">
+                        <Grid ColumnDefinitions="110,*,28" IsVisible="{Binding ShowProgramNameField}">
                             <TextBlock Text="PROGRAM NAME" FontSize="10" FontWeight="SemiBold" Foreground="#6B7280" VerticalAlignment="Center"/>
                             <TextBox Grid.Column="1" Text="{Binding ProgramName}" Watermark="Program name"/>
+                            <Button Grid.Column="2" Classes="browseBtn"
+                                    Content="⊕"
+                                    ToolTip.Tip="Browse programs"
+                                    Command="{Binding BrowseProgramsCommand}"/>
                         </Grid>
 
                     </StackPanel>

@@ -65,7 +65,7 @@ public partial class BehaviorChainViewModel : ViewModelBase
 
     public IReadOnlyList<string> PrivEscBehaviors { get; } = ["FodHelperAbuse"];
     public IReadOnlyList<string> PersistenceBehaviors { get; } = ["ServiceInstall"];
-    public IReadOnlyList<string> InjectionBehaviors { get; } = ["Simple"];
+    public IReadOnlyList<string> InjectionBehaviors { get; } = ["Simple", "Apc-EarlyBird"];
 
     private ObservableCollection<string> _payloads = [];
     public ObservableCollection<string> Payloads
@@ -75,6 +75,11 @@ public partial class BehaviorChainViewModel : ViewModelBase
     }
 
     public IAsyncRelayCommand RunChainCommand { get; }
+
+    public Action? BrowseProgramsRequested { get; set; }
+
+    [RelayCommand]
+    private void BrowsePrograms() => BrowseProgramsRequested?.Invoke();
 
     public BehaviorChainViewModel(PayloadService payloadService, ChainBehaviorService chainBehaviorService)
     {

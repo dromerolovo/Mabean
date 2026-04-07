@@ -10,6 +10,7 @@ public partial class MainWindowViewModel : ViewModelBase
     public BehaviorSimulationViewModel BehaviorSimulationViewModel { get; }
     public EventsViewModel EventsViewModel { get; }
     public ProcessFinderViewModel ProcessFinderViewModel { get; }
+    public ProgramFinderViewModel ProgramFinderViewModel { get; }
     public BehaviorVisualizationViewModel BehaviorVisualizationViewModel { get; }
     public BehaviorChainViewModel BehaviorChainViewModel { get; }
 
@@ -18,7 +19,7 @@ public partial class MainWindowViewModel : ViewModelBase
     private int _leftTab = 0;
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(ShowEvents), nameof(ShowProcesses))]
+    [NotifyPropertyChangedFor(nameof(ShowEvents), nameof(ShowProcesses), nameof(ShowPrograms))]
     private int _middleTab = 0;
 
     public bool ShowChain => LeftTab == 0;
@@ -27,6 +28,7 @@ public partial class MainWindowViewModel : ViewModelBase
 
     public bool ShowEvents => MiddleTab == 0;
     public bool ShowProcesses => MiddleTab == 1;
+    public bool ShowPrograms => MiddleTab == 2;
 
     public MainWindowViewModel(
         KeysManagmentViewModel keysManagmentViewModel,
@@ -34,6 +36,7 @@ public partial class MainWindowViewModel : ViewModelBase
         BehaviorSimulationViewModel behaviorSimulationViewModel,
         EventsViewModel eventsViewModel,
         ProcessFinderViewModel processFinderViewModel,
+        ProgramFinderViewModel programFinderViewModel,
         BehaviorVisualizationViewModel behaviorVisualizationViewModel,
         BehaviorChainViewModel behaviorChainViewModel)
     {
@@ -42,6 +45,7 @@ public partial class MainWindowViewModel : ViewModelBase
         BehaviorSimulationViewModel = behaviorSimulationViewModel;
         EventsViewModel = eventsViewModel;
         ProcessFinderViewModel = processFinderViewModel;
+        ProgramFinderViewModel = programFinderViewModel;
         BehaviorVisualizationViewModel = behaviorVisualizationViewModel;
         BehaviorChainViewModel = behaviorChainViewModel;
 
@@ -54,6 +58,18 @@ public partial class MainWindowViewModel : ViewModelBase
                 behaviorSimulationViewModel.Puid = pid.ToString();
             else if (ShowChain && behaviorChainViewModel.ShowInjectionPidField)
                 behaviorChainViewModel.InjectionTargetPid = (uint)pid;
+
+            MiddleTab = 0;
+        };
+
+        behaviorSimulationViewModel.BrowseProgramsRequested = () => MiddleTab = 2;
+        behaviorChainViewModel.BrowseProgramsRequested = () => MiddleTab = 2;
+        programFinderViewModel.ProgramSelected = name =>
+        {
+            if (ShowSimulate)
+                behaviorSimulationViewModel.ProgramName = name;
+            else if (ShowChain && behaviorChainViewModel.ShowInjectionProgramField)
+                behaviorChainViewModel.InjectionProgramName = name;
 
             MiddleTab = 0;
         };
@@ -73,4 +89,5 @@ public partial class MainWindowViewModel : ViewModelBase
 
     [RelayCommand] void SelectEvents() => MiddleTab = 0;
     [RelayCommand] void SelectProcesses() => MiddleTab = 1;
+    [RelayCommand] void SelectPrograms() => MiddleTab = 2;
 }
