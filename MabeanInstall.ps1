@@ -9,10 +9,11 @@ $IsAdmin = ([Security.Principal.WindowsPrincipal] `
 ).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
 
 if (-not $IsAdmin) {
-    Start-Process powershell `
-        -Verb RunAs `
-        -ArgumentList "-ExecutionPolicy Bypass -File `"$PSCommandPath`""
-    exit
+      $relaunchArgs = "-ExecutionPolicy Bypass -File `"$PSCommandPath`""                                                                              
+      if ($GenerateKey) { $relaunchArgs += " -GenerateKey" }
+      if ($GeminiApiKey -ne "") { $relaunchArgs += " -GeminiApiKey `"$GeminiApiKey`"" }
+      Start-Process powershell -Verb RunAs -ArgumentList $relaunchArgs
+      exit
 }
 
 $local = [Environment]::GetFolderPath([Environment+SpecialFolder]::LocalApplicationData)
@@ -87,13 +88,14 @@ if ($GeminiApiKey -ne "") {
     [Environment]::SetEnvironmentVariable("GEMINI_API_KEY", $GeminiApiKey, "User")
 }
 
-dotnet publish ".\Mabean\Mabean.csproj" `
-    -c Release `
-    -r win-x64 `
-    --self-contained false `
-    -p:PublishSingleFile=true `
-    -o "$env:TEMP\MabeanBuild"
+$appDir = Join-Path $mabeanDir "App"
+dotnet publish "$PSScriptRoot\Mabean\Mabean.csproj" -c Release -r win-x64 --self-contained false -o "$appDir"
 
-  $desktop = [Environment]::GetFolderPath([Environment+SpecialFolder]::Desktop)
-  Copy-Item "$env:TEMP\MabeanBuild\Mabean.exe" -Destination (Join-Path $desktop "Mabean.exe") -Force
+$desktop = [Environment]::GetFolderPath([Environment+SpecialFolder]::Desktop)
+$WshShell = New-Object -ComObject WScript.Shell
+$Shortcut = $WshShell.CreateShortcut((Join-Path $desktop "Mabean.lnk"))
+$Shortcut.TargetPath = Join-Path $appDir "Mabean.exe"
+$Shortcut.WorkingDirectory = $appDir
+$Shortcut.Save()
 
+Read-Host "Press Enter to exit"

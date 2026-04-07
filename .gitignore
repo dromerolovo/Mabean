@@ -495,3 +495,4 @@ $RECYCLE.BIN/
 
 MabeanScripts/ExternalDlls/
 *.recipe
+*.lscache
