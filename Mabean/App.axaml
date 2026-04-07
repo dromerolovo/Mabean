@@ -4,7 +4,7 @@
 			 xmlns:vm="using:Mabean.ViewModels"
 			 xmlns:views="using:Mabean.Views"
 			 x:Class="Mabean.App"
-			 RequestedThemeVariant="Default">
+			 RequestedThemeVariant="Dark">
 	<Application.Styles>
 		<shadui:ShadTheme />
 	</Application.Styles>
