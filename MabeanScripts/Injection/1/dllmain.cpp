@@ -207,6 +207,7 @@ extern "C" __declspec(dllexport) int InjectPayloadApcEarlyBird(const char* targe
     LPVOID blockMem;
     SIZE_T bytesWritten;
 
+
     si.cb = sizeof(si);
 
     if (!CreateProcessA(

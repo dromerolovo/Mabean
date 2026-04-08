@@ -59,15 +59,13 @@ public class ChainBehaviorService
                 case "Apc-EarlyBird":
                     var context2 = new BehaviorContext
                     {
-                        BehaviorName = "Injection-Simple",
+                        BehaviorName = "Apc-EarlyBird",
                         DllPath = Path.Combine(Paths.Dlls, "1.dll").ToString(),
                         TargetPID = injection.TargetPid ?? 0,
                         ProgramName = injection.ProgramName,
                         PayloadPath = injection.PayloadName
                     };
                     await WriteBehaviorContext(context2);
-                    var code5 = InteropInjection.InjectPayloadApcEarlyBird(injection.ProgramName!, payload, (nuint)payload.Length, null);
-                    LoggerService.Write($"[Chain] APC early bird injection result: {code5}");
                     if (injection.PayloadName.StartsWith("reverse-shell-"))
                         _reverseShellService.StopPolling();
                     break;
