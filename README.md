@@ -1,43 +1,42 @@
 
 ## Installation
 
-### 1. Clone the Repository
+### 1. Install Git
 
+Make sure Git is installed on your system.
+
+
+### 2. (Optional) Install msfvenom
+
+Install **msfvenom** if you plan to generate payloads or experiment with reverse shells.
+It should work when running the command in a shell
+
+```bash
+msfvenom
+```
+
+### 3. Clone the repository
 ```bash
 git clone https://github.com/dromerolovo/Mabean.git
 ```
 
-### 2. Navigate to the Root of the Repo
-
+### 4. Navigate to the root of the repo 
 ```bash
 cd Mabean
 ```
 
-### 3. Run the Environment Installation Script
+### 5. Disable Windows Defender
+Windows Security -> Virus & Thread Protection -> Manage Settings -> Turn off real time protection
 
-```powershell
+### 6. Run the environment installation script
+```bash
 .\EnvironmentInstallation.ps1
 ```
 
-### 4. Run the Mabean Installation Script
-
-```powershell
-.\MabeanInstall.ps1
-```
-
-### 5. Set Your Gemini API Key
-
+### 7. Run Mabean Installation script
 ```bash
-cd Mabean
-dotnet user-secrets set "GEMINI_API_KEY" "<your_gemini_api_key>"
+.\MabeanInstall.ps1 -geminiApiKey <your gemini api key>
 ```
 
-
-### 6. Run the App
-
-```bash
-dotnet run
-```
-
----
-
+### 8. Run the executable 
+You'll find an executable in the Desktop, run it
